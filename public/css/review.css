@@ -1,0 +1,19 @@
+.review {
+  background-color: rgb(240, 255, 246);
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.review > .row {
+  margin-bottom: 10px;
+}
+
+.review img {
+  border: 1px solid rgb(187, 187, 187);
+}
+
+.review .ratingview > span:before {
+  font-size: 1rem;
+  margin-top: 0;
+  margin-bottom: 0;
+}

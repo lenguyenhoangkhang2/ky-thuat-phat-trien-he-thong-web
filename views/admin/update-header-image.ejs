@@ -1,0 +1,93 @@
+<%- include('../includes/head.ejs') %>
+    </head>
+
+    <body>
+        <%- include('../includes/navigation.ejs') %>
+        <main>
+          <div class="container">
+            <div class="row justify-content-center">
+              <div>
+                <h2 class="mb-4 mt-4 text-uppercase text-center fw-bold text-success">Sửa đổi thông tin ảnh Header</h2>
+              </div>
+              <div class="col-lg-4">  
+                <div class="alert alert-info">
+                  <h5 class="fw-bold">Cập nhật ảnh</h5>
+                  <form action="/admin/update-header-image/?_csrf=<%=csrfToken%>" method="POST" enctype="multipart/form-data">
+                    <div class="mb-2">
+                      <select name="type" class="form-select <%= validationErrors.find(e => e.param === "type") ? "is-invalid" : "" %>">
+                          <option disabled>Loại ảnh</option>
+                          <option value="slider" <% if ((hasError || editing) && imageData.type === "slider") { %>selected<% } %>>
+                            Slider
+                          </option>
+                          <option value="banner" <% if ((hasError || editing) && imageData.type === "banner") { %>selected<% } %>>
+                            Banner
+                          </option>
+                      </select>        
+                      <% if(validationErrors.find(e => e.param === "type")) { %> 
+                      <div class="invalid-feedback">
+                          <%= validationErrors.find(e => e.param === "type").msg %>
+                      </div>
+                      <% } %>                           
+                    </div>
+                    <div class="mb-2">
+                      <label for="image" class="form-label">File ảnh (để trống nếu không thay đổi ảnh)</label>
+                      <input 
+                          class="form-control <%= validationErrors.find(e => e.param === "image") ? "is-invalid" : "" %>"
+                          type="file" 
+                          name="image" 
+                          id="image" 
+                      >
+                      <% if(validationErrors.find(e => e.param === "image")) { %> 
+                      <div class="invalid-feedback">
+                          <%= validationErrors.find(e => e.param === "image").msg %>
+                      </div>
+                      <% } %> 
+                    </div>
+                    <div class="mb-2">
+                      <label for="linkTo" class="form-label">Đường dẫn đến</label>
+                      <input 
+                          class="form-control <%= validationErrors.find(e => e.param === "linkTo") ? "is-invalid" : "" %>"
+                          type="text" 
+                          name="linkTo" 
+                          id="linkTo" 
+                          value="<% if(hasError || editing) { %><%= imageData.linkTo %><% } %>"   
+                      >
+                      <% if(validationErrors.find(e => e.param === "linkTo")) { %> 
+                      <div class="invalid-feedback">
+                          <%= validationErrors.find(e => e.param === "linkTo").msg %>
+                      </div>
+                      <% } %> 
+                    </div>
+                    <div class="mb-3 form-check form-switch">
+                      <label class="form-check-label" for="isActive">Hiển thị</label>
+                      <input type="hidden" value="0" id="isActiveHidden" name="isActive" />
+                      <input class="form-check-input" type="checkbox" name="isActive" id="isActive" value="1">
+                    </div>
+                    <input type="hidden" name="imageId" value="<%= imageData._id %>" />
+                    <button class="btn submit">Cập nhật</button>
+                  </form>
+                </div>
+              </div>
+              <div class="<%= imageData.type === "slider" ? 'col-lg-5' : 'col-lg-2' %>">
+                <div class="card">
+                  <div class="card-title text-center mt-2">
+                    <strong>Ảnh hiện tại</strong>
+                  </div>
+                  <img class="card-img-top" src="/<%= imageData.imageUrl %>" alt="current-image"/>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+        <script>
+          const inIsActiveHidden = document.querySelector("#isActiveHidden");
+          const inIsActive = document.querySelector("#isActive");
+          inIsActive.checked = inIsActiveHidden.disabled = <%= imageData.active %>;
+
+          inIsActive.addEventListener("change", (e) => {
+            e.target.value = Number(e.target.checked); 
+            inIsActiveHidden.disabled = e.target.checked;
+          })
+        </script>
+        <%- include('../includes/end.ejs') %>
+        <script src="/js/admin.js"></script>

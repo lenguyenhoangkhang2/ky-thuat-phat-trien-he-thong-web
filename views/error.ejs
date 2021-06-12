@@ -1,0 +1,23 @@
+<%- include('includes/head.ejs') %>
+</head>
+
+<body>
+    <%- include('includes/navigation.ejs') %>
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-8">
+          <div class="card mt-4">
+            <div class="card-body">
+              <% if(httpStatusCode) { %> 
+                <h1 class="card-title"> <%= httpStatusCode %></h1>
+              <% } %> 
+              <% if(errorMessage) { %> 
+                <h2 class="card-text"><%= errorMessage %><h2>
+              <% } %> 
+              <a href="/" class="btn btn-primary btn-sm">Về trang chủ</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>  
+<%- include('includes/end.ejs') %>

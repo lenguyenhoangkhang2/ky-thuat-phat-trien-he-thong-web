@@ -1,0 +1,52 @@
+<div class="row">
+    <div class="col-lg-9">
+        <div id="headerSlider" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <% slider.forEach((image, index) => { %> 
+                <% if(index==0) { %> 
+                    <button type="button" data-bs-target="#headerSlider" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+                <% } else { %> 
+                    <button type="button" data-bs-target="#headerSlider" data-bs-slide-to="<%= index %>" aria-label="Slide <%= index %>"></button>
+                <% } %> 
+            <% }) %> 
+        </div>
+        <div class="carousel-inner home-slider">
+            <% slider.forEach((image, index) => { %>
+                <% if (index===0) { %>
+                <div class="carousel-item active">
+                    <img src="/<%= image.imageUrl %>" class="d-block w-100" alt="image-slider">
+                </div>
+                <% } else { %> 
+                <div class="carousel-item">
+                    <img src="/<%= image.imageUrl %>" class="d-block w-100" alt="image-slider">
+                </div>
+                <% } %> 
+            <% }) %> 
+        </div>  
+        <button class="carousel-control-prev" type="button" data-bs-target="#headerSlider" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#headerSlider" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="row g-1">
+            <div class="col-6">
+                <img src="/<%= banner[0].imageUrl %>" class="d-block w-100" alt="image-banner">
+            </div>
+            <div class="col-6">
+                <img src="/<%= banner[1].imageUrl %>" class="d-block w-100" alt="image-banner">
+            </div>
+            <div class="col-6">
+                <img src="/<%= banner[2].imageUrl %>" class="d-block w-100" alt="image-banner">
+            </div>
+            <div class="col-6">
+                <img src="/<%= banner[3].imageUrl %>" class="d-block w-100" alt="image-banner">
+            </div>
+        </div>
+    </div>
+</div>

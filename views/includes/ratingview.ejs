@@ -1,0 +1,6 @@
+<% if(!rating) rating = 0 %> 
+<div class="ratingview">
+<% for(let i = 10; i > 0; i--) { %> 
+    <span class="<%= i % 2 === 0 ? "full" : "half" %> <%= i <= rating * 2 ? "active": ""  %>" ></span>
+<% } %> 
+</div>

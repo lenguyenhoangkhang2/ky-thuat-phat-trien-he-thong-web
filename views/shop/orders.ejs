@@ -1,0 +1,81 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/orders.css">
+    </head>
+
+    <body>
+        <%- include('../includes/navigation.ejs') %>
+        <main>
+            <div class="container">
+                <% if (orders.length <= 0) { %>
+                    <div class="row justify-content-center">
+                    <div class="col-5 text-center">
+                        <div class="card mt-4">
+                        <div class="card-body">
+                            <h3 class="card-title">Chưa có đơn hàng nào được đặt</h3>
+                            <a href="/" class="btn btn-primary mt-3">Mua hàng</a>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+                <% } else { %>
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <ul class="orders">
+                                <% orders.forEach(order => { %>
+                                    <% 
+                                    %> 
+                                    <li class="orders__item">
+                                        <h1><strong>Mã đơn hàng:</strong> <%= order._id %> <% if(isAdmin) { %><a href="/orders/<%= order.id %>">Invoice</a><% } %></h1>
+                                        <h1 class="mt-2"><strong>Địa chỉ nhận:</strong> <%= order.user.address %></h1>
+                                        <h1 class="mt-2"><strong>Trạng thái: </strong><%= order.status %></h1>
+                                        <h1 class="mt-2"><strong>Ngày đặt hàng: </strong><%= order.createdAt.getHours() + ":" + order.createdAt.getMinutes() + " " + order.createdAt.getDate() + "-" + order.createdAt.getMonth() + "-" + order.createdAt.getFullYear()%></h1>
+                                        <h1 class="mt-2"><strong>Cập nhật lần cuối: </strong><%= order.updatedAt.getHours() + ":" + order.updatedAt.getMinutes() + " " + order.updatedAt.getDate() + "-" + order.updatedAt.getMonth() + "-" + order.updatedAt.getFullYear() %></h1>
+                                        <table class="table table-success table-striped table-bordered border-dark mt-3">
+                                            <thead>
+                                                <tr>
+                                                    <th>Tên sản phẩm</th>
+                                                    <th>Số lượng</th>
+                                                    <th>Đã giảm giá</th>
+                                                    <th>Giá</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <% order.products.forEach(p => { %> 
+                                                    <tr>
+                                                        <td><%= p.product.name %></td>
+                                                        <td><%= p.quantity %></td>
+                                                        <td><%= p.product.discount > 0 ? p.product.discount + "%" : "không có"%> </td>
+                                                        <td class="price"><%= p.product.price %></td>
+                                                    </tr>
+                                                <% }); %>
+                                            </tbody>
+                                        </table>
+                                        <div class="total"><strong>Tổng tiền <span class="price"><%= order.total %></span></strong></div>
+                                        <% if(order.status === "Chờ xác nhận") { %>
+                                            <div class="mt-2">
+                                                <% if(isAdmin) { %> 
+                                                <a href="admin/update-order" class="btn">Cập nhật đơn hàng</a>
+                                                <% } %> 
+                                                <a href="<%= path === "/orders" ? "/cancel-order-owner" : "/admin/cancel-order" %>/<%= order._id %>" class="btn">Hủy đơn hàng</a>
+                                            </div>
+                                        <% } %>  
+                                        <% if(error && error.orderId === order.id) { %>
+                                            <div class="mt-2 alert alert-danger">
+                                                <%= error.message %> 
+                                            </div>
+                                        <% } %>  
+                                    </li>
+                                <% }); %>
+                            </ul>
+                        </div>
+                    </div>
+                <% } %>
+            </div>  
+        </main>
+        <script>
+            const allCartItemsPrice = [...document.querySelectorAll(".price")];
+            allCartItemsPrice.forEach(i => {
+                i.innerHTML = i.innerHTML.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + "đ";
+            })
+        </script>
+        <%- include('../includes/end.ejs') %>

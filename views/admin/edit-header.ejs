@@ -1,0 +1,173 @@
+<%- include('../includes/head.ejs') %>
+    </head>
+
+    <body>
+        <%- include('../includes/navigation.ejs') %>
+        <main>
+          <div class="container">
+            <div class="row">
+              <div class="col-lg-4">  
+                <div class="alert alert-info">
+                  <h5 class="fw-bold">Thêm ảnh</h5>
+                  <form action="/admin/edit-header/?_csrf=<%=csrfToken%>" method="POST" enctype="multipart/form-data">
+                    <div class="mb-2">
+                      <select name="type" class="form-select <%= validationErrors.find(e => e.param === "type") ? "is-invalid" : "" %>">
+                          <option disabled <% if(!hasError || !addImageData.type) { %>selected<% } %>>Loại ảnh</option>
+                          <option value="slider" <% if (hasError && addImageData.type === "slider") { %>selected<% } %>>
+                            Slider
+                          </option>
+                          <option value="banner" <% if (hasError && addImageData.type === "banner") { %>selected<% } %>>
+                            Banner
+                          </option>
+                      </select>        
+                      <% if(validationErrors.find(e => e.param === "type")) { %> 
+                      <div class="invalid-feedback">
+                          <%= validationErrors.find(e => e.param === "type").msg %>
+                      </div>
+                      <% } %>                           
+                    </div>
+                    <div class="mb-2">
+                      <label for="image" class="form-label">File ảnh</label>
+                      <input 
+                          class="form-control <%= validationErrors.find(e => e.param === "image") ? "is-invalid" : "" %>"
+                          type="file" 
+                          name="image" 
+                          id="image" 
+                      >
+                      <% if(validationErrors.find(e => e.param === "image")) { %> 
+                      <div class="invalid-feedback">
+                          <%= validationErrors.find(e => e.param === "image").msg %>
+                      </div>
+                      <% } %> 
+                    </div>
+                    <div class="mb-2">
+                      <label for="linkTo" class="form-label">Đường dẫn đến</label>
+                      <input 
+                          class="form-control <%= validationErrors.find(e => e.param === "linkTo") ? "is-invalid" : "" %>"
+                          type="text" 
+                          name="linkTo" 
+                          id="linkTo" 
+                          value="<% if(hasError) { %><%= addImageData.linkTo %><% } %>"   
+                      >
+                      <% if(validationErrors.find(e => e.param === "linkTo")) { %> 
+                      <div class="invalid-feedback">
+                          <%= validationErrors.find(e => e.param === "linkTo").msg %>
+                      </div>
+                      <% } %> 
+                    </div>
+                    <div class="mb-3 form-check form-switch">
+                      <label class="form-check-label" for="isActive">Hiển thị</label>
+                      <input type="hidden" value="0" id="isActiveHidden" name="isActive" />
+                      <input class="form-check-input" type="checkbox" name="isActive" id="isActive" 
+                        <% if(hasError) { %><%= addImageData.isActive ?  "checked" : "" %><% } %> 
+                      >
+                    </div>
+                    <button class="btn submit">Thêm ảnh</button>
+                  </form>
+                </div>
+              </div>
+              <% 
+                const slider = headerImages.filter(image => image.type === "slider");
+                const activeSlider = slider.filter(image => image.active);
+                const banner = headerImages.filter(image => image.type === "banner");
+                const activeBanner = banner.filter(image => image.active);
+              %> 
+              <div class="col-lg-8">
+                <div class="row">
+                  <div class="col-12">  
+                    <div class="alert alert-success">
+                      <div class="row">
+                        <div class="col-lg-8">
+                          <div class="row">
+                            <h5 class="mb-1 text-center fw-bold">Slider <% if(slider.length > 0) { %>(<%= slider.length %>)<% } %></h5>
+                            <% if(slider.length > 0) { %>
+                              <strong class="mb-3 text-center">Đang hiển thị (<%= activeSlider.length %>)</strong>
+                            <% } %>  
+                            <% if(slider.length) { %> 
+                              <div class="overflow-auto" style="max-height: 550px;">
+                              <% slider.forEach(item => { %> 
+                                <div class="col-12 mb-2">
+                                  <div class="card">
+                                    <img class="card-img-top border" src="/<%= item.imageUrl %>" alt="image">
+                                    <div class="card-body">
+                                      <div class="row">
+                                        <div class="col-8">
+                                          <h6 class="fw-bold">Đường dẫn: <a href="<%= item.linkTo %>">link</a></h6>
+                                          <h6 class="fw-bold">Trạng thái: <small class="<%= item.active ? "text-success" : "text-danger" %> "><%= item.active ? "Đang hiển thị" : "Ẩn" %></small></h6>
+                                        </div>
+                                        <div class="col-4 text-end">
+                                          <a class="btn" href="/admin/edit-header/<%= item._id %>">Sửa</a>
+                                          <form action="/admin/delete-header-image" method="POST">
+                                            <input hidden name="imageId" value="<%= item._id %>">
+                                            <input hidden name="_csrf" value="<%= csrfToken %>" >
+                                            <button class="btn">Xóa</button>
+                                          </form>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <% }) %> 
+                              </div>
+                            <% } else { %>
+                              <div class="text-center">
+                                <strong>(Chưa có ảnh)</strong>
+                              </div>
+                            <% } %> 
+                          </div>
+                        </div>
+                        <div class="col-lg-4">
+                          <div class="row">
+                            <h5 class="mb-` text-center fw-bold">Banner <% if(banner.length > 0) { %>(<%= banner.length %>)<% } %></h5>
+                            <% if(banner.length > 0) { %>
+                              <strong class="mb-3 text-center">Đang hiển thị (<%= activeBanner.length %>)</strong>
+                            <% } %> 
+                            <% if(banner.length) { %> 
+                              <div class="overflow-auto" style="max-height: 550px;">
+                              <% banner.forEach(item => { %> 
+                                <div class="col-12 mb-2">
+                                  <div class="card">
+                                    <img class="card-img-top border" src="/<%= item.imageUrl %>" alt="image">
+                                    <div class="card-body">
+                                      <div class="row">
+                                        <div class="col-12">
+                                          <h6 class="fw-bold">Đường dẫn: <a href="<%= item.linkTo %>">link</a></h6>
+                                          <h6 class="fw-bold">Trạng thái: <small class="<%= item.active ? 'text-success' : 'text-danger'%>"><%= item.active ? "Đang hiển thị" : "Ẩn" %></small></h6>
+                                          <a class="btn" href="/admin/edit-header/<%= item._id %>">Sửa</a>
+                                          <form action="/admin/delete-header-image" method="POST">
+                                            <input hidden name="imageId" value="<%= item._id %>">
+                                            <input hidden name="_csrf" value="<%= csrfToken %>" >
+                                            <button class="btn">Xóa</button>
+                                          </form>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              <% }) %>
+                              </div> 
+                            <% } else { %>
+                              <div class="text-center">
+                                <strong>(Chưa có ảnh)</strong>
+                              </div>
+                            <% } %> 
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>   
+              </div>
+            </div>
+          </div>
+          <script>
+            const inIsActiveHidden = document.querySelector("#isActiveHidden");
+            const inIsActive = document.querySelector("#isActive");
+            inIsActive.addEventListener("change", (e) => {
+              e.target.value = Number(e.target.checked); 
+              inIsActiveHidden.disabled = e.target.checked;
+            })
+          </script>
+        </main>
+        <%- include('../includes/end.ejs') %>
+        <script src="/js/admin.js"></script>

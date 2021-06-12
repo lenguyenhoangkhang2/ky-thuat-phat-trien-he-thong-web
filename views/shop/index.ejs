@@ -1,0 +1,92 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/product.css">
+</head>
+
+<body>
+    <%- include('../includes/navigation.ejs') %>
+
+    <main>
+        <div class="container">
+            <%- include("../includes/headerView.ejs", {
+                slider: slider,
+                banner: banner,
+            }) %> 
+            <% if (smartphone.length > 0) { %>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="alert alert-success">
+                            <h3 class="mb-0">Điện thoại mới</h3>
+                        </div>
+                    </div>
+                    <% for (let product of smartphone) { %>
+                        <div class="col-lg-3">
+                            <div class="card">
+                                <div class="card-body centered">
+                                    <img src="/<%= product.imageUrl.official %>" class="card-img-top" alt="<%= product.name %>">
+                                    <h5 class="card-title mt-3"><%= product.name %></h5>
+                                    <h5 class="card-text mb-0">
+                                        <span class="fw-bold"><%= product.formatDiscountPrice() %></span>
+                                        <% if(product.discount > 0) { %> 
+                                        <small class="text-decoration-line-through"><%= product.formatPrice() %></small>
+                                        <% } %> 
+                                    </h5>
+                                    <div class="row" <%= !product.getRating() ? 'style=visibility:hidden;' : "" %>>
+                                        <div class="col-12 rating-container">
+                                        <%- include("../includes/ratingview.ejs", {
+                                            rating: product.getRating(),
+                                        })%> 
+                                        </div>
+                                    </div>
+                                    <a href="/products/<%= product._id %>" class="btn">Details</a>
+                                    <% if (isAuthenticated) { %>
+                                        <%- include('../includes/add-to-cart.ejs', {product: product}) %>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            <% } else { %>
+                <h1>No Products Found!</h1>
+            <% } %>
+            <% if (laptop.length > 0) { %>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="alert alert-success">
+                            <h3 class="mb-0">Laptop mới</h3>
+                        </div>
+                    </div>
+                    <% for (let product of laptop) { %>
+                        <div class="col-lg-3">
+                            <div class="card">
+                                <div class="card-body centered">
+                                    <img src="/<%= product.imageUrl.official %>" class="card-img-top" alt="<%= product.name %>">
+                                    <h5 class="card-title mt-3"><%= product.name %></h5>
+                                    <h5 class="card-text mb-0">
+                                        <span class="fw-bold"><%= product.formatDiscountPrice() %></span>
+                                        <% if(product.discount > 0) { %> 
+                                        <small class="text-decoration-line-through"><%= product.formatPrice() %></small>
+                                        <% } %> 
+                                    </h5>
+                                    <div class="row" <%= !product.getRating() ? 'style=visibility:hidden;' : "" %>>
+                                        <div class="col-12 rating-container">
+                                        <%- include("../includes/ratingview.ejs", {
+                                            rating: product.getRating(),
+                                        })%> 
+                                        </div>
+                                    </div>
+                                    <a href="/products/<%= product._id %>" class="btn">Details</a>
+                                    <% if (isAuthenticated) { %>
+                                        <%- include('../includes/add-to-cart.ejs', {product: product}) %>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+            <% } else { %>
+                <h1>No Products Found!</h1>
+            <% } %>
+        </div>
+    </main>
+<%- include('../includes/end.ejs') %>

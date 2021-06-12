@@ -1,0 +1,189 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/forms.css">
+    <link rel="stylesheet" href="/css/product.css">
+</head>
+
+<body>
+   <%- include('../includes/navigation.ejs') %>
+
+    <main>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-7">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="card-title">
+                                <div class="alert alert-info">
+                                    <h3 class="text-center m-0">THÊM SẢN PHẨM</h3>
+                                </div>
+                            </div>
+                            <form action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>/?_csrf=<%=csrfToken%>" method="POST" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <select name="category" class="form-select <%= validationErrors.find(e => e.param === "category") ? "is-invalid" : "" %>">
+                                        <option disabled <% if(!(editing || hasError)) { %>selected<% } %>>Loại sản phẩm</option>
+                                        <option value="Laptop" <% if ((editing || hasError) && product.category === "Laptop") { %>selected<% } %>>
+                                            Laptop
+                                        </option>
+                                        <option value="Điện thoại" <% if ((editing || hasError) && product.category === "Điện thoại") { %>selected<% } %>>
+                                            Điện thoại
+                                        </option>
+                                    </select>        
+                                    <% if(validationErrors.find(e => e.param === "category")) { %> 
+                                    <div class="invalid-feedback">
+                                        <%= validationErrors.find(e => e.param === "category").msg %>
+                                    </div>
+                                    <% } %>                           
+                                </div>
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Tên sản phẩm</label>
+                                    <input 
+                                        class="form-control <%= validationErrors.find(e => e.param === "name") ? "is-invalid" : "" %>"
+                                        type="text" 
+                                        name="name" 
+                                        id="name" 
+                                        value="<% if (editing || hasError) { %><%= product.name %><% } %>"
+                                    >
+                                    <% if(validationErrors.find(e => e.param === "name")) { %> 
+                                    <div class="invalid-feedback">
+                                        <%= validationErrors.find(e => e.param === "name").msg %>
+                                    </div>
+                                    <% } %> 
+                                </div>
+                                <div class="mb-3">
+                                    <label for="brand" class="form-label">Thương hiệu</label>
+                                    <input 
+                                        class="form-control <%= validationErrors.find(e => e.param === "brand") ? "is-invalid" : "" %>"
+                                        type="text" 
+                                        name="brand" 
+                                        id="brand" 
+                                        value="<% if (editing || hasError) { %><%= product.brand %><% } %>"
+                                    >
+                                    <% if(validationErrors.find(e => e.param === "brand")) { %> 
+                                    <div class="invalid-feedback">
+                                        <%= validationErrors.find(e => e.param === "brand").msg %>
+                                    </div>
+                                    <% } %> 
+                                </div>
+                                <div class="mb-3">
+                                    <label for="official" class="form-label">Ảnh sản phẩm</label>
+                                    <input 
+                                        class="form-control <%= validationErrors.find(e => e.param === "official") ? "is-invalid" : "" %>"
+                                        type="file" 
+                                        name="official" 
+                                        id="official" 
+                                    >
+                                    <% if(validationErrors.find(e => e.param === "official")) { %> 
+                                    <div class="invalid-feedback">
+                                        <%= validationErrors.find(e => e.param === "official").msg %>
+                                    </div>
+                                    <% } %> 
+                                </div>
+                                <div class="mb-3">
+                                    <label for="slider" class="form-label">Slider ảnh sản phẩm</label>
+                                    <input 
+                                        class="form-control <%= validationErrors.find(e => e.param === "slider") ? "is-invalid" : "" %>"
+                                        type="file" 
+                                        name="slider" 
+                                        id="slider" 
+                                        class="form-control"
+                                        multiple
+                                    >
+                                    <% if(validationErrors.find(e => e.param === "slider")) { %> 
+                                    <div class="invalid-feedback">
+                                        <%= validationErrors.find(e => e.param === "slider").msg %>
+                                    </div>
+                                    <% } %> 
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="mb-3">
+                                            <label for="quantity" class="form-label">Số lượng</label>
+                                            <input 
+                                                class="form-control <%= validationErrors.find(e => e.param === "quantity") ? "is-invalid" : "" %>" 
+                                                type="number" 
+                                                name="quantity" 
+                                                id="quantity" 
+                                                step="1" 
+                                                min="0"
+                                                value="<% if (editing || hasError) { %><%= product.quantity %><% } %>"
+                                            >
+                                            <% if(validationErrors.find(e => e.param === "quantity")) { %> 
+                                            <div class="invalid-feedback">
+                                                <%= validationErrors.find(e => e.param === "quantity").msg %>
+                                            </div>
+                                            <% } %> 
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="mb-3">
+                                            <label for="price" class="form-label">Giá</label>
+                                            <input 
+                                                class="form-control <%= validationErrors.find(e => e.param === "price") ? "is-invalid" : "" %>" 
+                                                type="number" 
+                                                name="price" 
+                                                id="price" 
+                                                step="0.01" 
+                                                value="<% if (editing || hasError) { %><%= product.price %><% } %>"
+                                            >
+                                            <% if(validationErrors.find(e => e.param === "price")) { %> 
+                                            <div class="invalid-feedback">
+                                                <%= validationErrors.find(e => e.param === "price").msg %>
+                                            </div>
+                                            <% } %> 
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="mb-3">
+                                            <label for="discount" class="form-label">Giảm giá</label>
+                                            <input 
+                                                class="form-control <%= validationErrors.find(e => e.param === "discount") ? "is-invalid" : "" %>"
+                                                type="number" 
+                                                name="discount" 
+                                                id="discount" 
+                                                step="1" 
+                                                value="<% if (editing || hasError) { %><%= product.discount %><% } %>"
+                                            >
+                                            <% if(validationErrors.find(e => e.param === "discount")) { %> 
+                                            <div class="invalid-feedback">
+                                                <%= validationErrors.find(e => e.param === "discount").msg %>
+                                            </div>
+                                            <% } %> 
+                                        </div>
+                                    </div>
+                                  </div>
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Mô tả</label>
+                                    <textarea 
+                                        class="form-control <%= validationErrors.find(e => e.param === "description") ? "invalid" : "" %>"
+                                        name="description" 
+                                        id="description" 
+                                        rows="5"
+                                    ><% if (editing || hasError) { %><%= product.description %><% } %></textarea>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="details" class="form-label">Thông số sản phẩm</label>
+                                    <textarea 
+                                        class="form-control <%= validationErrors.find(e => e.param === "details") ? "is-invalid" : "" %>"
+                                        name="details" 
+                                        id="details" 
+                                        rows="5"
+                                    ><% if (editing || hasError) { %><%= product.details %><% } %></textarea>
+                                    <% if(validationErrors.find(e => e.param === "details")) { %> 
+                                        <div class="invalid-feedback">
+                                            <%= validationErrors.find(e => e.param === "details").msg %>
+                                        </div>
+                                    <% } %> 
+                                </div>
+                                <% if (editing) { %>
+                                    <input type="hidden" value="<%= product._id %>" name="productId">
+                                <% } %>
+                    
+                                <button class="btn" type="submit"><% if (editing) { %>Update Product<% } else { %>Add Product<% } %></button>
+                            </form>
+                        </div>
+                    </div>     
+                </div>
+            </div>
+        </div>
+    </main>
+<%- include('../includes/end.ejs') %>

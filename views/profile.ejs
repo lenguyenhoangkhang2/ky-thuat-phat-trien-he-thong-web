@@ -1,0 +1,85 @@
+<%- include('includes/head.ejs') %>
+</head>
+
+<body>
+    <%- include('includes/navigation.ejs') %>
+    <div class="container">
+      <div class="row mt-3 justify-content-center">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-body">
+              <img src="<% if(user.avatar) { %> <%= user.avatar %> <% } else { %>http://localhost:3000/images/default_avatar.png<% } %>" 
+                class="img-fluid img-thumbnail" 
+                alt="avatar"
+                style="width: 200px;"
+              >
+              <h5 class="card-title"><b><%= user.name %></b></h5>
+              <p class="card-text"><%= user.email %></p>
+
+              <form action="/user/contact" method="POST">
+                <div class="alert alert-success mt-5" role="alert">
+                  <span class="font-weight-bold">THÔNG TIN LIÊN LẠC</span>
+                </div>
+                <div class="mb-3">
+                  <label for="country" class="form-label">Quốc gia</label>
+                  <input 
+                    type="text" 
+                    name="country" 
+                    class="form-control" 
+                    id="country" 
+                    value="<%= user.contact.country %>"
+                  >
+                </div>
+                <div class="mb-3">
+                  <label for="province" class="form-label">Tỉnh, Thành phố</label>
+                  <input 
+                    type="text" 
+                    name="province" 
+                    class="form-control" 
+                    id="province" 
+                    value="<%= user.contact.province %>"
+                  >
+                </div>
+                <div class="mb-3">
+                  <label for="district" class="form-label">Quận, Huyện</label>
+                  <input 
+                    type="text" 
+                    name="district" 
+                    id="district" 
+                    class="form-control" 
+                    value="<%= user.contact.district %>"
+                  >
+                </div>
+                <div class="mb-3">
+                  <label for="detail" class="form-label">Đường, Số nhà</label>
+                  <input 
+                    type="text" 
+                    name="detail" 
+                    id="detail" 
+                    class="form-control" 
+                    value="<%= user.contact.detail %>"
+                  >
+                </div>
+                <div class="mb-3">
+                  <label for="phone" class="form-label">Số Điện Thoại</label>
+                  <input 
+                    type="text" 
+                    name="phone" 
+                    id="phone" 
+                    class="form-control" 
+                    value="<%= user.contact.phone %>"
+                  >
+                </div>
+                <% if(hasErrorUpdateContact) { %>
+                  <div class="alert alert-danger" role="alert"><%= errorMessage %></div>
+                <% } %> 
+
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <button type="submit" class="btn">Sửa đổi</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>  
+<%- include('includes/end.ejs') %>

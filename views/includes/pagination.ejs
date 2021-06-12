@@ -1,0 +1,38 @@
+<% 
+    const hasNextPage = itemPerPage * currentPage < totalItems ? true : false;
+    const hasPreviousPage = currentPage > 1 ? true : false;
+    const nextPage = currentPage + 1;
+    const previousPage = currentPage - 1;
+    const lastPage = Math.ceil(totalItems / itemPerPage);
+%> 
+<nav class="pagination justify-content-center">
+    <ul class="pagination">
+        <% if(currentPage !== 1 && previousPage !== 1) {%>
+            <li class="page-item">
+                <a class="page-link" href="?page=1<% if(hasFilter) { %>&<%= query %><% } %>">1</a>
+            </li>
+        <% } %> 
+      
+        <% if(hasPreviousPage) {%>
+            <li class="page-item">
+                <a class="page-link" href="?page=<%= previousPage %><% if(hasFilter) { %>&<%= query %><% } %>"><%= previousPage %></a>
+            </li>
+        <% } %> 
+
+        <li class="page-item">
+            <a class="page-link active" href="?page=<%= currentPage %><% if(hasFilter) { %>&<%= query %><% } %>"><%= currentPage %></a>
+        </li>
+      
+        <% if(hasNextPage) {%>
+            <li class="page-item">
+                <a class="page-link" href="?page=<%= nextPage %><% if(hasFilter) { %>&<%= query %><% } %>"><%= nextPage %></a>
+            </li>
+        <% } %> 
+            
+        <% if(lastPage !== currentPage && lastPage !== nextPage) { %> 
+            <li class="page-item">
+                <a class="page-link" href="?page=<%= lastPage %><% if(hasFilter) { %>&<%= query %><% } %>"><%= lastPage %></a>
+            </li>
+        <% } %> 
+    </ul>
+</nav>
