@@ -90,6 +90,12 @@ router.post(
   adminController.postEditProduct
 );
 
+router.get("/update-order/:orderId", adminController.updateOrder);
+
+router.get("/cancel-order/:orderId", adminController.cancelOrder);
+
+router.get("/return-order/:orderId", adminController.returnOrder);
+
 router.delete("/product/:productId", isAdmin, adminController.deleteProduct);
 
 module.exports = router;

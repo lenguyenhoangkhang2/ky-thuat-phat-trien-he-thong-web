@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const { validationResult } = require("express-validator");
 const Product = require("../models/product");
 const HeaderImage = require("../models/headerImage");
+const { sendMail } = require("../util/mail");
 const File = require("../util/file");
 const Order = require("../models/order");
 
@@ -448,6 +449,110 @@ exports.deleteHeaderImage = async (req, res, next) => {
   }
 };
 
+exports.returnOrder = async (req, res, next) => {
+  const orderId = req.params.orderId;
+
+  try {
+    const order = await Order.findOne({ _id: orderId, status: "Đang vận chuyển" });
+    if (order) {
+      order.status = "Đã trả về";
+      await order.save();
+    }
+    res.redirect("/admin/orders");
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
+};
+
+exports.updateOrder = async (req, res, next) => {
+  const orderId = req.params.orderId;
+  try {
+    const order = await Order.findById(orderId);
+    await order.populate("user.userId").execPopulate();
+
+    if (order) {
+      if (["Đã hủy", "Đã nhận"].includes(order.status)) {
+        const error = {
+          message:
+            order.status === "Đã hủy"
+              ? "Đơn hàng này đã bị hủy"
+              : "Đơn hàng này đã được nhận",
+          orderId: orderId,
+        };
+
+        const orders = await Order.find();
+        return res.render("shop/orders", {
+          path: "/orders",
+          pageTitle: "Your Orders",
+          orders: orders,
+          error: error,
+        });
+      }
+
+      switch (order.status) {
+        case "Chờ xác nhận":
+          order.status = "Đã xác nhận";
+          break;
+        case "Đã trả về":
+        case "Đã xác nhận":
+          order.status = "Đang vận chuyển";
+          break;
+        case "Đang vận chuyển":
+          order.status = "Đã nhận";
+          break;
+        default:
+          break;
+      }
+
+      const tableHtmlProducts = order.products.reduce((html, p) => {
+        return (html += `<tr>
+          <td>${p.product.name}</td>
+          <td>${p.quantity}</td>
+          <td>${p.product.discount > 0 ? p.product.discount + "%" : "không có"}</td>
+          <td class="price">${
+            p.product.price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + "đ"
+          }</td>
+        </tr>`);
+      }, "");
+
+      await sendMail({
+        to: order.user.userId.email,
+        subject: "Cập nhật đơn hàng",
+        htmlContent: `
+          <h2>Đơn hàng của bạn đã được cập nhật</h2>
+          <h3><strong>Mã đơn hàng: ${order._id}</strong><h3>
+          <h3>Trạng thái: ${order.status}, 
+              cập nhật lúc ${order.updatedAt.getHours()}:${order.updatedAt.getMinutes()} ${order.updatedAt.getDate()}/${order.updatedAt.getMonth()}/${order.updatedAt.getFullYear()}
+          </h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Tên sản phẩm</th>
+                <th>Số lượng</th>
+                <th>Đã giảm giá</th>
+                <th>Giá</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableHtmlProducts}
+            </tbody>
+          </table>
+          <h4>Tổng tiền: ${order.total}</h4>
+        `,
+      });
+
+      await order.save();
+    }
+    res.redirect("/admin/orders");
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
+};
+
 exports.cancelOrder = async (req, res, next) => {
   const orderId = req.params.orderId;
   try {
@@ -492,7 +597,7 @@ exports.cancelOrder = async (req, res, next) => {
 
 exports.getOrders = async (req, res, next) => {
   try {
-    const orders = await Order.find().sort({
+    const orders = await Order.find().populate("user.userId").sort({
       createdAt: -1,
     });
 

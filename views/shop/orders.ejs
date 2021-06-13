@@ -20,12 +20,16 @@
                 <% } else { %>
                     <div class="row justify-content-center">
                         <div class="col-lg-8">
+                            <div class="alert alert-info text-center">
+                                <h2 class="mb-0 fw-bold">DANH SÁCH ĐƠN HÀNG</h2>
+                            </div>
                             <ul class="orders">
                                 <% orders.forEach(order => { %>
                                     <% 
                                     %> 
                                     <li class="orders__item">
                                         <h1><strong>Mã đơn hàng:</strong> <%= order._id %> <% if(isAdmin) { %><a href="/orders/<%= order.id %>">Invoice</a><% } %></h1>
+                                        <h1 class="mt-2"><strong>Khách hàng: </strong><%= order.user.userId.name %>, <strong>email:</strong> <%= order.user.userId.email %>, <strong>SĐT: </strong><%= order.user.userId.contact.phone %></h1>
                                         <h1 class="mt-2"><strong>Địa chỉ nhận:</strong> <%= order.user.address %></h1>
                                         <h1 class="mt-2"><strong>Trạng thái: </strong><%= order.status %></h1>
                                         <h1 class="mt-2"><strong>Ngày đặt hàng: </strong><%= order.createdAt.getHours() + ":" + order.createdAt.getMinutes() + " " + order.createdAt.getDate() + "-" + order.createdAt.getMonth() + "-" + order.createdAt.getFullYear()%></h1>
@@ -51,14 +55,23 @@
                                             </tbody>
                                         </table>
                                         <div class="total"><strong>Tổng tiền <span class="price"><%= order.total %></span></strong></div>
-                                        <% if(order.status === "Chờ xác nhận") { %>
-                                            <div class="mt-2">
-                                                <% if(isAdmin) { %> 
-                                                <a href="admin/update-order" class="btn">Cập nhật đơn hàng</a>
-                                                <% } %> 
+                                        <% if(isAdmin) { %>
+                                        <div class="mt-2">
+                                            <% if(order.status === "Chờ xác nhận") { %>
+                                                <a href="/admin/update-order/<%= order._id %>" class="btn">Xác nhận</a>
+                                            <% } %> 
+                                            <% if(order.status === "Đã xác nhận" || order.status === "Đã trả về") { %>
+                                                <a href="/admin/update-order/<%= order._id %>" class="btn">Gửi hàng</a>
+                                            <% } %> 
+                                            <% if(order.status === "Đang vận chuyển") { %>
+                                                <a href="/admin/update-order/<%= order._id %>" class="btn">Đã nhận hàng</a>
+                                                <a href="/admin/return-order/<%= order._id %>" class="btn">Chưa nhận hàng</a>
+                                            <% } %> 
+                                            <% if(!["Đã nhận", "Đã hủy"].includes(order.status)) { %> 
                                                 <a href="<%= path === "/orders" ? "/cancel-order-owner" : "/admin/cancel-order" %>/<%= order._id %>" class="btn">Hủy đơn hàng</a>
-                                            </div>
-                                        <% } %>  
+                                            <% } %> 
+                                        </div>
+                                        <% } %> 
                                         <% if(error && error.orderId === order.id) { %>
                                             <div class="mt-2 alert alert-danger">
                                                 <%= error.message %> 

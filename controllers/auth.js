@@ -1,19 +1,12 @@
 const crypto = require("crypto");
 
 const bcrypt = require("bcryptjs");
-const nodemailer = require("nodemailer");
-const sendgridTransport = require("nodemailer-sendgrid-transport");
+
 const { validationResult } = require("express-validator");
 
 const User = require("../models/user");
 
-const transporter = nodemailer.createTransport(
-  sendgridTransport({
-    auth: {
-      api_key: "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",
-    },
-  })
-);
+const { sendMail } = require("../util/mail");
 
 exports.getLogin = (req, res, next) => {
   let message = req.flash("error");
@@ -149,12 +142,11 @@ exports.postSignup = (req, res, next) => {
     })
     .then(() => {
       res.redirect("/login");
-      return transporter.sendMail({
-        to: email,
-        from: "lenguyenhoangkhang2@gmail.com",
-        subject: "Signup succeeded",
-        html: "<h1>You successfully signed up!</h1>",
-      });
+      return sendMail(
+        email,
+        "Đăng ký thành công",
+        "Bạn đã đang ký tài khoản website thành công"
+      );
     })
     .catch((err) => {
       const error = new Error(err);
@@ -186,41 +178,36 @@ exports.getReset = (req, res, next) => {
 };
 
 exports.postReset = (req, res, next) => {
-  crypto.randomBytes(32, (err, buffer) => {
+  crypto.randomBytes(32, async (err, buffer) => {
     if (err) {
       console.log(err);
       return res.redirect("/reset");
     }
 
     const token = buffer.toString("hex");
-    User.findOne({ email: req.body.email })
-      .then((user) => {
-        if (!user) {
-          req.flash("error", "No account with that email found!");
-          return res.redirect("/reset");
-        }
+    try {
+      const user = await User.findOne({ email: req.body.email });
+      if (!user) {
+        req.flash("error", "No account with that email found!");
+        return res.redirect("/reset");
+      }
 
-        user.resetToken = token;
-        user.resetTokenExpiration = Date.now() + 360000;
-        return user.save();
-      })
-      .then((result) => {
-        res.redirect("/");
-        transporter.sendMail({
-          to: req.body.email,
-          from: "lenguyenhoangkhang2@gmail.com",
-          subject: "Password Reset",
-          html: `
-            <p>You requested a password reset.</p>
-            <p>Click this <a href="http://localhost:3000/reset/${token}">link reset password</a> to set new password.</p>
-          `,
-        });
-      })
-      .catch((err) => {
-        const error = new Error(err);
-        error.httpStatusCode = 500;
-        return next(error);
+      user.resetToken = token;
+      user.resetTokenExpiration = Date.now() + 360000;
+      await user.save();
+      await sendMail({
+        to: req.body.email,
+        subject: "Password Reset",
+        htmlContent: `<p>You requested a password reset.</p>
+        <p>Click this <a href="http://localhost:3000/reset/${token}">link reset password</a> to set new password.</p>`,
       });
+
+      res.redirect("/login");
+    } catch (err) {
+      const error = new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    }
   });
 };
 

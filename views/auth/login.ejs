@@ -1,44 +1,56 @@
 <%- include('../includes/head.ejs') %>
-    <link rel="stylesheet" href="/css/forms.css">
-    <link rel="stylesheet" href="/css/auth.css">
 </head>
 
 <body>
    <%- include('../includes/navigation.ejs') %>
 
     <main>
-        <% if(errorMessage) { %> 
-            <div class="user-message user-message--error"><%= errorMessage %></div>
-        <% } %> 
-        <form class="login-form" action="/login" method="POST">
-                <label for="email">E-Mail</label>
-                <input 
-                    class="form-control <%= validationErrors.find(e => e.param === "email") ? "invalid" : "" %>"
-                    type="email" 
-                    name="email" 
-                    id="email" 
-                    value="<%= oldInput.email %>"
-                >
-                <label for="password">Password</label>
-                <input 
-                    class="form-control <%= validationErrors.find(e => e.param === "password") ? "invalid" : "" %>"
-                    type="password" 
-                    name="password" 
-                    id="password" 
-                    value="<%= oldInput.password %>">
-            
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <div class="text-center mb-2">
-                <button class="btn" type="submit">Login</button>    
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="mb-0 fw-bold text-center text-success">Đăng nhập</h3>
+                        </div>
+                        <div class="card-body">
+                            <% if(errorMessage) { %> 
+                                <div class="alert alert-danger"><%= errorMessage %></div>
+                            <% } %> 
+                            <form class="login-form" action="/login" method="POST">
+                                    <label class="form-label" for="email">E-Mail</label>
+                                    <input 
+                                        class="form-control <%= validationErrors.find(e => e.param === "email") ? "invalid" : "" %>"
+                                        type="email" 
+                                        name="email" 
+                                        id="email" 
+                                        value="<%= oldInput.email %>"
+                                    >
+                                    <label class="form-label mt-2" for="password">Password</label>
+                                    <input 
+                                        class="form-control <%= validationErrors.find(e => e.param === "password") ? "invalid" : "" %>"
+                                        type="password" 
+                                        name="password" 
+                                        id="password" 
+                                        value="<%= oldInput.password %>">
+                                
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                 
+                                <div class="text-center mt-2">
+                                    <button class="btn w-100" type="submit">Đăng nhập</button>    
+                                </div>
+                            </form>
+                            <div class="text-center mt-2">
+                                <a href="/oauth2/google" class="btn w-100 red darken-1">
+                                    <i class="fab fa-google left"></i> Đăng nhập với Google
+                                </a>
+                            </div>
+                            <div class="text-center mt-2"> 
+                                <a href="/reset">Quên mật khẩu</a>
+                            </div> 
+                        </div>
+                    </div>
+                </div>
             </div>
-        </form>
-        <div class="centered"> 
-            <a href="/reset">Reset Password</a>
-        </div>   
-        <div class="centered mt-2">
-            <a href="/oauth2/google" class="btn red darken-1">
-                <i class="fab fa-google left"></i> Đăng nhập với Google
-            </a>
         </div>
     </main>
 <%- include('../includes/end.ejs') %>

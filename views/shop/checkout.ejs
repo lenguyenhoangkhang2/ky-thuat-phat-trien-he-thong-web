@@ -1,34 +1,142 @@
 <%- include('../includes/head.ejs') %>
-
-<link rel="stylesheet" href="/css/cart.css">
+    <link rel="stylesheet" href="/css/cart.css">
     </head>
 
     <body>
         <%- include('../includes/navigation.ejs') %>
         <main>
-          <ul class="cart__item-list">
-            <% products.forEach(p => { %>
-                <li class="cart__item">
-                    <h1><%= p.productId.title %></h1>
-                    <h2>Quantity: <%= p.quantity %></h2>
-                </li>
-            <% }) %>
-          </ul> 
-          <div>
-            <h2 class="centered">Total: <%= totalSum %></h2>
-          </div>
-          <div class="centered">
-            <button id="order-btn" class="btn">Order</button>
+            <div class="container">
+                <% if (products.length > 0) { %>
+                <div class="row justify-content-center">
+                    <dic class="col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="alert alert-primary">
+                                            <h3 class="mb-0 fw-bold text-center">Danh sách sản phẩm</h3>
+                                            <% if(hasError) { %> 
+                                            <div class="alert mt-2 alert-danger">
+                                                <h5 class="mb-0 text-center"><%= errorMessage %></h5>
+                                            </div>
+                                            <% } %> 
+                                            <% products.forEach(p => { %>
+                                                <div class="cart-item pt-3 pb-3">
+                                                    <div class="row">
+                                                        <div class="col-3">
+                                                            <img src="<%= p.productId.imageUrl.official %>" class="w-100" alt="productImage" />
+                                                        </div>
+                                                        <div class="col-9">
+                                                            <strong><%= p.productId.name %></strong><br>
+                                                            <span class="cart-item-price" data-price="<%= p.productId.getPriceWithDiscount() %>"><%= p.productId.formatDiscountPrice() %></span><br/>
+                                                            Số lượng: <input name="quantity" style="width: 80px;" type="number" min="1" step="1" value="<%= p.quantity %>"/>
+                                                            <input name="productId" type="hidden" value="<%= p.productId._id %>"/>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <hr>
+                                            <% }) %>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <h5 class="price fw-bold"><strong>Tổng tiền: <%= total %></strong></h5>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="alert alert-success" role="alert">
+                                            <h3 class="mb-0 fw-bold text-center">Thông tin liên lạc</h3>
+                                            <div class="mb-3">
+                                                <label for="country" class="form-label">Quốc gia</label>
+                                                <input 
+                                                type="text" 
+                                                name="country" 
+                                                class="form-control" 
+                                                id="country" 
+                                                readonly
+                                                value="<%= contact.country %>"
+                                                >
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="province" class="form-label">Tỉnh, Thành phố</label>
+                                                <input 
+                                                type="text" 
+                                                name="province" 
+                                                class="form-control" 
+                                                id="province" 
+                                                readonly
+                                                value="<%= contact.province %>"
+                                                >
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="district" class="form-label">Quận, Huyện</label>
+                                                <input 
+                                                type="text" 
+                                                name="district" 
+                                                id="district" 
+                                                class="form-control" 
+                                                readonly
+                                                value="<%= contact.district %>"
+                                                >
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="detail" class="form-label">Đường, Số nhà</label>
+                                                <input 
+                                                type="text" 
+                                                name="detail" 
+                                                id="detail" 
+                                                class="form-control" 
+                                                readonly
+                                                value="<%= contact.detail %>"
+                                                >
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="phone" class="form-label">Số Điện Thoại</label>
+                                                <input 
+                                                type="text" 
+                                                name="phone" 
+                                                id="phone" 
+                                                class="form-control" 
+                                                readonly
+                                                value="<%= contact.phone %>"
+                                                >
+                                            </div>
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                            <a href="/profile" class="btn">Sửa đổi</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-3 text-end">
+                                        <a href="/checkout/cod-payment" class="btn w-100">
+                                            Thanh toán khi nhận hàng
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% } else { %>
+                    <div class="row justify-content-center">
+                        <div class="col-5 text-center">
+                        <div class="card mt-4">
+                            <div class="card-body">
+                            <h3 class="card-title">Chưa có sản phẩm trong giỏ hàng</h3>
+                            <a href="/" class="btn btn-primary mt-3">Mua hàng</a>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
             <script src="https://js.stripe.com/v3/"></script>
             <script>
-              var stripe = Stripe("pk_test_51IjzZzI46iToXABsPrxNKMb3dnQueNfc8CND3EDjZ0WlEZKKmu0NWVlH8UMtUf9ytFUQXBijc6MLG5ZrWPZrWDmq00JBE3u4DL");
-              var orderBtn = document.getElementById("order-btn");
-              orderBtn.addEventListener("click", () => {
-                stripe.redirectToCheckout({
-                  sessionId: "<%= sessionId %>",
-                });
-              });
+              const allCartItemsPrice = [...document.querySelectorAll(".price")];
+              allCartItemsPrice.forEach(i => {
+                  i.innerHTML = i.innerHTML.replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + "đ";
+              })
             </script>
-          </div>
         </main>
-<%- include('../includes/end.ejs') %>
+        <%- include('../includes/end.ejs') %>
+            

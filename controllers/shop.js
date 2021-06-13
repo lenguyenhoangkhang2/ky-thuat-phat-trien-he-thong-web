@@ -6,7 +6,6 @@ const stripe = require("stripe")(
   "sk_test_51IjzZzI46iToXABs6pgoDEDMuGhGIW1hHMR21Ucg6XINESSCnMg7tIcqaw81g51TMJmndS8Su6rW0hwTHX1stneC00swRs3LDD"
 );
 
-const User = require("../models/user");
 const Product = require("../models/product");
 const Order = require("../models/order");
 const HeaderImage = require("../models/headerImage");
@@ -258,11 +257,7 @@ exports.getCart = (req, res, next) => {
       const products = user.cart.items;
       res.render("shop/cart", {
         path: "/cart",
-        hasError: false,
-        contact: user.contact,
-        errorMessage: null,
         pageTitle: "Your Cart",
-        hasErrorUpdateContact: false,
         products: products,
       });
     })
@@ -319,14 +314,16 @@ exports.orderCod = async (req, res, next) => {
     const cartItems = req.user.cart.items;
 
     if (!country || !province || !district || !detail || !phone) {
-      return res.render("shop/cart", {
-        path: "/cart",
+      const session = await createStripeSession();
+      return res.render("shop/checkout", {
+        path: "/checkout",
         hasError: true,
         contact: req.user.contact,
         errorMessage: "Thông tin liên lạc còn thiếu, vui lòng bổ sung",
         pageTitle: "Your Cart",
         hasErrorUpdateContact: false,
         products: cartItems,
+        stripeSessionId: session.id,
       });
     }
 
@@ -367,80 +364,29 @@ exports.orderCod = async (req, res, next) => {
   }
 };
 
-exports.getCheckout = (req, res, next) => {
-  let products;
-  let total;
+exports.getCheckout = async (req, res, next) => {
+  try {
+    await req.user.populate("cart.items.productId").execPopulate();
+    const products = req.user.cart.items;
+    const total = products.reduce((total, p) => {
+      return total + p.quantity * p.productId.price;
+    }, 0);
 
-  req.user
-    .populate("cart.items.productId")
-    .execPopulate()
-    .then((user) => {
-      products = user.cart.items;
-
-      total = 0;
-      products.forEach((p) => {
-        total += p.quantity * p.productId.price;
-      });
-
-      return stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        line_items: products.map((p) => {
-          return {
-            name: p.productId.title,
-            description: p.productId.description,
-            amount: p.productId.price,
-            currency: "VND",
-            quantity: p.quantity,
-          };
-        }),
-        success_url: req.protocol + "://" + req.get("host") + "/checkout/success",
-        cancel_url: req.protocol + "://" + req.get("host") + "/checkout/cancel",
-      });
-    })
-    .then((session) => {
-      res.render("shop/checkout", {
-        path: "/checkout",
-        pageTitle: "Checkout",
-        products: products,
-        totalSum: total,
-        sessionId: session.id,
-      });
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+    res.render("shop/checkout", {
+      path: "/checkout",
+      pageTitle: "Checkout",
+      hasError: false,
+      contact: req.user.contact,
+      errorMessage: null,
+      products: products,
+      total: total,
+      stripeSessionId: session.id,
     });
-};
-
-exports.getCheckoutSuccess = (req, res, next) => {
-  req.user
-    .populate("cart.items.productId")
-    .execPopulate()
-    .then((user) => {
-      const products = user.cart.items.map((i) => {
-        return { quantity: i.quantity, product: { ...i.productId._doc } };
-      });
-      const order = new Order({
-        user: {
-          email: req.user.email,
-          userId: req.user,
-        },
-        products: products,
-      });
-      return order.save();
-    })
-    .then((result) => {
-      return req.user.clearCart();
-    })
-    .then(() => {
-      res.redirect("/orders");
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
-    });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
 exports.getOrders = (req, res, next) => {
@@ -516,7 +462,7 @@ exports.getInvoice = (req, res, next) => {
       const invoiceName = "invoice-" + orderId + ".pdf";
       const invoicePath = path.join("data", "invoices", invoiceName);
 
-      const pdfDoc = new pdfDocument();
+      const pdfDoc = new pdfDocument({ size: "A5" });
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", "inline; filename='" + invoiceName + "'");
 
@@ -525,16 +471,17 @@ exports.getInvoice = (req, res, next) => {
 
       let totalPrice = 0;
 
-      pdfDoc.fontSize(26).text("Invoice", {
+      pdfDoc.font("Times-Roman").fontSize(26).text("INVOICE", {
         underline: true,
       });
 
       order.products.forEach((item) => {
         totalPrice += item.product.price * item.quantity;
         pdfDoc
+          .font("Times-Roman")
           .fontSize(12)
           .text(
-            item.product.title + " - " + item.quantity + " x " + item.product.price + "đ"
+            item.product.name + " - " + item.quantity + " x " + item.product.price + "đ"
           );
       });
 

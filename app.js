@@ -14,7 +14,7 @@ const User = require("./models/user");
 const ViewUtil = require("./util/viewUtils");
 
 dotenv.config({ path: "./config/config.env" });
-require("./config/googlePassport")(passport);
+require("./util/googlePassport")(passport);
 
 const MONGODB_URI = process.env.MONGO_URI;
 const PORT = process.env.PORT;

@@ -26,9 +26,9 @@ const orderSchema = new Schema(
       enum: [
         "Chờ xác nhận",
         "Đã xác nhận",
-        "Đang gửi",
+        "Đang vận chuyển",
         "Đã nhận",
-        "Đã trả lại",
+        "Đã trả về",
         "Đã hủy",
       ],
     },

@@ -23,13 +23,9 @@ router.post("/cart/quantity", isAuth, express.json(), shopController.updateCartQ
 
 router.post("/cart-delete-item", isAuth, shopController.postCartDeleteProduct);
 
-router.get("/payment-cod", isAuth, shopController.orderCod);
-
 router.get("/checkout", isAuth, shopController.getCheckout);
 
-router.get("/checkout/success", shopController.getCheckoutSuccess);
-
-router.get("/checkout/cancel", shopController.getCheckout);
+router.get("/checkout/cod-payment", isAuth, shopController.orderCod);
 
 router.get("/orders", isAuth, shopController.getOrders);
 
