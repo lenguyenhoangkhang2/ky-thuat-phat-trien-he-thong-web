@@ -17,7 +17,7 @@
                         </div>
                         <div class="card-body">
                             <% if(errorMessage) { %> 
-                                <div class="user-message user-message--error"><%= errorMessage %></div>
+                                <div class="alert alert-danger"><%= errorMessage %></div>
                             <% } %> 
                             <form class="login-form" action="/signup" method="POST" novalidate>
                                     <label class="form-label" for="name">Tên của bạn</label>
