@@ -62,7 +62,7 @@
                         <% if(hasError) { %><%= addImageData.isActive ?  "checked" : "" %><% } %> 
                       >
                     </div>
-                    <button class="btn submit">Thêm ảnh</button>
+                    <button class="btn btn-primary submit">Thêm ảnh</button>
                   </form>
                 </div>
               </div>
@@ -96,11 +96,11 @@
                                           <h6 class="fw-bold">Trạng thái: <small class="<%= item.active ? "text-success" : "text-danger" %> "><%= item.active ? "Đang hiển thị" : "Ẩn" %></small></h6>
                                         </div>
                                         <div class="col-4 text-end">
-                                          <a class="btn" href="/admin/edit-header/<%= item._id %>">Sửa</a>
+                                          <a class="btn btn-warning" href="/admin/edit-header/<%= item._id %>">Sửa</a>
                                           <form action="/admin/delete-header-image" method="POST">
                                             <input hidden name="imageId" value="<%= item._id %>">
                                             <input hidden name="_csrf" value="<%= csrfToken %>" >
-                                            <button class="btn">Xóa</button>
+                                            <button class="btn btn-danger">Xóa</button>
                                           </form>
                                         </div>
                                       </div>
@@ -133,11 +133,11 @@
                                         <div class="col-12">
                                           <h6 class="fw-bold">Đường dẫn: <a href="<%= item.linkTo %>">link</a></h6>
                                           <h6 class="fw-bold">Trạng thái: <small class="<%= item.active ? 'text-success' : 'text-danger'%>"><%= item.active ? "Đang hiển thị" : "Ẩn" %></small></h6>
-                                          <a class="btn" href="/admin/edit-header/<%= item._id %>">Sửa</a>
+                                          <a class="btn btn-warning" href="/admin/edit-header/<%= item._id %>">Sửa</a>
                                           <form action="/admin/delete-header-image" method="POST">
                                             <input hidden name="imageId" value="<%= item._id %>">
                                             <input hidden name="_csrf" value="<%= csrfToken %>" >
-                                            <button class="btn">Xóa</button>
+                                            <button class="btn btn-danger">Xóa</button>
                                           </form>
                                         </div>
                                       </div>

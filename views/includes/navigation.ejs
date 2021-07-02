@@ -4,33 +4,32 @@
     <nav class="main-header__nav">
         <ul class="main-header__item-list">
             <li class="main-header__item">
-                <a class="<%= path === '/' ? 'active' : '' %>" href="/">Shop</a>
+                <a class="<%= path === '/' ? 'active' : '' %>" href="/">Trang Chủ</a>
             </li>
             <li class="main-header__item">
-                <a class="<%= path === '/products' ? 'active' : '' %>" href="/products">Products</a>
+                <a class="<%= path === '/products' ? 'active' : '' %>" href="/products">Tất Cả Sản Phẩm</a>
             </li>
             <% if (isAuthenticated) { %>
                 <li class="main-header__item">
-                    <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">Cart</a>
+                    <a class="<%= path === '/cart' ? 'active' : '' %>" href="/cart">Giỏ Hàng</a>
                 </li>
                 <li class="main-header__item">
-                    <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders">Orders</a>
+                    <a class="<%= path === '/orders' ? 'active' : '' %>" href="/orders">Đơn Hàng</a>
                 </li>
                 <% if(isAdmin) { %> 
                     <li class="main-header__item">
-                        <a class="<%= path === '/admin/add-product' ? 'active' : '' %>" href="/admin/add-product">Add Product</a>
+                        <a class="<%= path === '/admin/add-product' ? 'active' : '' %>" href="/admin/add-product">Thêm Sản Phẩm</a>
                     </li>
                     <li class="main-header__item">
-                        <a class="<%= path === '/admin/products' ? 'active' : '' %>" href="/admin/products">Admin Products
+                        <a class="<%= path === '/admin/edit-header' ? 'active' : '' %>" href="/admin/edit-header">QL Header
                         </a>
                     </li>
                     <li class="main-header__item">
-                        <a class="<%= path === '/admin/edit-header' ? 'active' : '' %>" href="/admin/edit-header">Admin Header
+                        <a class="<%= path === '/admin/orders' ? 'active' : '' %>" href="/admin/orders">QL Đơn Hàng
                         </a>
                     </li>
                     <li class="main-header__item">
-                        <a class="<%= path === '/admin/orders' ? 'active' : '' %>" href="/admin/orders">Admin Orders
-                        </a>
+                        <a class="<%= path === "/admin/accounts" ? "active" : "" %>" href="/admin/accounts">QL Tài Khoản</a>
                     </li>
                 <% } %>             
             <% } %>

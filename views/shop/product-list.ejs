@@ -69,14 +69,15 @@
                     <div class="row">
                         <% for (let product of prods) { %>
                             <div class="col-lg-3">
-                                <div class="card">
+                                <div class="card position-relative">
                                     <div class="card-body centered">
                                         <img src="/<%= product.imageUrl.official %>" class="card-img-top" alt="<%= product.name %>">
                                         <h5 class="card-title mt-3"><%= product.name %></h5>
-                                        <h5 class="card-text mb-0">
+                                        <h6 class="card-text mb-0">
                                             <span class="fw-bold price"><%= product.priceWithDiscount %></span>
                                             <small class="text-decoration-line-through price"><%= product.price %></small>
-                                        </h5>
+                                            <span class="badge bg-danger"><%= product.discount > 0 ? "-" + product.discount + "%" : "" %></span>
+                                        </h6>
                                         <div class="row" <%= !product.avgRating ? 'style=visibility:hidden;' : "" %>>
                                             <div class="col-12 rating-container">
                                             <%- include("../includes/ratingview.ejs", {
@@ -84,10 +85,15 @@
                                             })%> 
                                             </div>
                                         </div>
-                                        <a href="/products/<%= product._id %>" class="btn btn-primary">Details</a>
-                                        <% if (isAuthenticated) { %>
-                                            <%- include('../includes/add-to-cart.ejs', {product: product}) %>
-                                        <% } %>
+                                        <div class="<%= isAdmin ? "mb-2" : "" %>">
+                                            <a href="/products/<%= product._id %>" class="btn btn-primary">Chi tiết</a>
+                                            <% if (isAuthenticated) { %>
+                                                <%- include('../includes/add-to-cart.ejs', {product: product}) %>
+                                            <% } %> 
+                                        </div>
+                                        <% if(isAdmin) { %> 
+                                            <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn btn-danger">Cập nhật thông tin</a>                                   
+                                        <% } %> 
                                     </div>
                                 </div>
                             </div>
