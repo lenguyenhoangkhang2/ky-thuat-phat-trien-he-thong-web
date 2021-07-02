@@ -3,52 +3,61 @@ const Product = require("./product");
 
 const Schema = mongoose.Schema;
 
-const userSchema = new Schema({
-  email: {
-    type: String,
-    required: true,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  name: {
-    type: String,
-    required: true,
-  },
-  avatar: {
-    type: String,
-  },
-  contact: {
-    phone: { type: String, default: "" },
-    country: { type: String, default: "" },
-    province: { type: String, default: "" },
-    district: { type: String, default: "" },
-    detail: { type: String, default: "" },
-  },
-  roles: {
-    type: [String],
-    enum: ["user", "admin"],
-    default: "user",
-  },
-  googleId: {
-    type: String,
-  },
-  resetToken: String,
-  resetTokenExpiration: Date,
-  cart: {
-    items: [
-      {
-        productId: {
-          type: Schema.Types.ObjectId,
-          ref: "Product",
-          required: true,
+const userSchema = new Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    name: {
+      type: String,
+      required: true,
+    },
+    avatar: {
+      type: String,
+    },
+    contact: {
+      phone: { type: String, default: "" },
+      country: { type: String, default: "" },
+      province: { type: String, default: "" },
+      district: { type: String, default: "" },
+      detail: { type: String, default: "" },
+    },
+    roles: {
+      type: [String],
+      enum: ["user", "admin"],
+      default: "user",
+    },
+    googleId: {
+      type: String,
+    },
+    resetToken: String,
+    resetTokenExpiration: Date,
+    cart: {
+      items: [
+        {
+          productId: {
+            type: Schema.Types.ObjectId,
+            ref: "Product",
+            required: true,
+          },
+          quantity: { type: Number, required: true },
         },
-        quantity: { type: Number, required: true },
-      },
-    ],
+      ],
+    },
   },
-});
+  {
+    timestamps: true,
+  }
+);
 
 userSchema.methods.addToCart = function (product) {
   const cartProductIndex = this.cart.items.findIndex((cp) => {

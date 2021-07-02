@@ -4,7 +4,6 @@
 
     <body>
         <%- include('../includes/navigation.ejs') %>
-
             <main>
                 <% if (prods.length > 0) { %>
                     <div class="grid">
@@ -27,10 +26,10 @@
                                     </p>
                                 </div>
                                 <div class="card__actions">
-                                    <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn">Edit</a>                                   
+                                    <a href="/admin/edit-product/<%= product._id %>?edit=true" class="btn btn-success">Edit</a>                                   
                                     <input type="hidden" value="<%= product._id %>" name="productId">
                                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                    <button class="btn" type="button" onclick="deleteProduct(this)">Delete</button>    
+                                    <button class="btn btn-danger" type="button" onclick="deleteProduct(this)">Delete</button>    
                                 </div>
                             </article>
                             <% } %>

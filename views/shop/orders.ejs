@@ -25,8 +25,6 @@
                             </div>
                             <ul class="orders">
                                 <% orders.forEach(order => { %>
-                                    <% 
-                                    %> 
                                     <li class="orders__item">
                                         <h1><strong>Mã đơn hàng:</strong> <%= order._id %> <% if(isAdmin) { %><a href="/orders/<%= order.id %>">Invoice</a><% } %></h1>
                                         <h1 class="mt-2"><strong>Khách hàng: </strong><%= order.user.userId.name %>, <strong>email:</strong> <%= order.user.userId.email %>, <strong>SĐT: </strong><%= order.user.userId.contact.phone %></h1>

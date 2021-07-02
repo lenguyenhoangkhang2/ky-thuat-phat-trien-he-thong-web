@@ -29,7 +29,7 @@ exports.sendMail = async ({ to, subject, htmlContent }) => {
   });
 
   return transporter.sendMail({
-    from: "HOÀNG KHANG <" + adminEmail + ">",
+    from: "Shop NodeJS <" + adminEmail + ">",
     to: to,
     subject: subject,
     html: htmlContent,

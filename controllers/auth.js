@@ -1,12 +1,10 @@
 const crypto = require("crypto");
-
 const bcrypt = require("bcryptjs");
-
 const { validationResult } = require("express-validator");
 
 const User = require("../models/user");
-
 const { sendMail } = require("../util/mail");
+const jwtToken = require("../util/jwtToken");
 
 exports.getLogin = (req, res, next) => {
   let message = req.flash("error");
@@ -42,7 +40,7 @@ exports.getSignup = (req, res, next) => {
   });
 };
 
-exports.postLogin = (req, res, next) => {
+exports.postLogin = async (req, res, next) => {
   const email = req.body.email;
   const password = req.body.password;
   const errors = validationResult(req);
@@ -60,51 +58,192 @@ exports.postLogin = (req, res, next) => {
     });
   }
 
-  User.findOne({ email: email })
-    .then((user) => {
-      if (!user) {
-        return res.status(442).render("auth/login", {
-          path: "/login",
-          pageTitle: "Login",
-          errorMessage: "Invalid email!",
-          oldInput: {
-            email: email,
-            password: password,
-          },
-          validationErrors: [],
-        });
-      }
-      bcrypt
-        .compare(password, user.password)
-        .then((doMath) => {
-          if (doMath) {
-            req.session.isLoggedIn = true;
-            req.session.userId = user._id;
-            return req.session.save((err) => {
-              res.redirect("/");
-            });
-          }
-          return res.status(442).render("auth/login", {
-            path: "/login",
-            pageTitle: "Login",
-            errorMessage: "Invalid password!",
-            oldInput: {
-              email: email,
-              password: password,
-            },
-            validationErrors: [],
-          });
-        })
-        .catch((err) => {
-          console.log(err);
-          res.redirect("/login");
-        });
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+  try {
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return res.status(442).render("auth/login", {
+        path: "/login",
+        pageTitle: "Login",
+        errorMessage: "Invalid email!",
+        oldInput: {
+          email: email,
+          password: password,
+        },
+        validationErrors: [],
+      });
+    }
+
+    if (!user.emailVerified) {
+      return res.status(442).render("auth/login", {
+        path: "/login",
+        pageTitle: "Login",
+        errorMessage: "Email chưa được xác nhận",
+        oldInput: {
+          email: email,
+          password: password,
+        },
+        validationErrors: [],
+        currentEmail: user.email,
+      });
+    }
+
+    const doMath = await bcrypt.compare(password, user.password);
+
+    if (doMath) {
+      req.session.isLoggedIn = true;
+      req.session.userId = user._id;
+      return req.session.save((err) => {
+        res.redirect("/");
+      });
+    } else {
+      return res.status(442).render("auth/login", {
+        path: "/login",
+        pageTitle: "Login",
+        errorMessage: "Invalid password!",
+        oldInput: {
+          email: email,
+          password: password,
+        },
+        validationErrors: [],
+      });
+    }
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
+};
+
+exports.sendEmailVerify = async (req, res, next) => {
+  const email = req.body.email;
+  const password = req.body.password;
+
+  try {
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return res.status(442).render("auth/login", {
+        path: "/login",
+        pageTitle: "Login",
+        errorMessage: "Invalid email!",
+        oldInput: {
+          email: email,
+          password: password,
+        },
+        validationErrors: [],
+      });
+    }
+
+    const token = await jwtToken.generate(
+      { email: email },
+      process.env.VERIFY_USER_EMAIL_SECRET,
+      "20m"
+    );
+
+    await sendMail({
+      to: email,
+      subject: "Xác nhận email Shop NodeJS",
+      htmlContent: `
+        <h3>Nhấn vào <a href='${req.headers.origin}/verify-email-by-token/${token}'>đường dẫn</a> để xác nhận email của bạn</h3>
+      `,
     });
+
+    res.status(442).render("auth/login", {
+      path: "/login",
+      pageTitle: "Login",
+      errorMessage: "Đã gửi email xác nhận",
+      oldInput: {
+        email: email,
+        password: password,
+      },
+      validationErrors: [],
+      currentEmail: user.email,
+    });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
+};
+
+exports.verifyUserEmailByToken = async (req, res, next) => {
+  const token = req.params.token;
+  try {
+    const decoded = await jwtToken.verify(token, process.env.VERIFY_USER_EMAIL_SECRET);
+
+    const user = await User.findOne({ email: decoded.data.email });
+    user.emailVerified = true;
+    await user.save();
+
+    res.render("auth/verify-user-email", {
+      resend: false,
+      errorMessage: null,
+      pageTitle: "Xác nhận email",
+      email: null,
+      reSendErrorMessage: null,
+    });
+  } catch (err) {
+    res.render("auth/verify-user-email", {
+      resend: false,
+      errorMessage: err.message,
+      pageTitle: "Xác nhận email",
+      email: null,
+      reSendErrorMessage: null,
+    });
+  }
+};
+
+exports.reSendVerifyUserEmailWhenError = async (req, res, next) => {
+  const email = req.body.email;
+  const oldErrorMessage = req.body.errorMessage;
+
+  const errors = [...validationResult(req).array()];
+
+  try {
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      errors.push({ msg: "Email này chưa được đăng ký" });
+    }
+
+    if (user.emailVerified) {
+      errors.push({ msg: "Email này đã được xác nhận" });
+    }
+
+    if (errors.length > 0) {
+      return res.render("auth/verify-user-email", {
+        errorMessage: oldErrorMessage,
+        resend: true,
+        reSendErrorMessage: errors[0].msg,
+        email: email,
+        pageTitle: "Xác nhận email",
+      });
+    }
+
+    const token = await jwtToken.generate(
+      { email: email },
+      process.env.VERIFY_USER_EMAIL_SECRET,
+      "30000"
+    );
+
+    await sendMail({
+      to: email,
+      subject: "Xác nhận email Shop NodeJS",
+      htmlContent: `
+        <h3>Nhấn vào <a href='${req.headers.origin}/verify-email-by-token/${token}'>đường dẫn</a> để xác nhận email của bạn</h3>
+      `,
+    });
+
+    return res.render("auth/verify-user-email", {
+      resend: true,
+      errorMessage: oldErrorMessage,
+      reSendErrorMessage: null,
+      pageTitle: "Xác nhận email",
+      email: email,
+    });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
 exports.postSignup = (req, res, next) => {

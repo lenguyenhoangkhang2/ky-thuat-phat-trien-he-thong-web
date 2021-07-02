@@ -41,7 +41,9 @@ module.exports = (passport) => {
               if (!userByEmail.password) {
                 userByEmail.password = await generatePW();
               }
-
+              if (!userByEmail.emailVerified) {
+                userByEmail.emailVerified = true;
+              }
               await userByEmail.save();
               return done(null, userByEmail);
             } else {
@@ -54,6 +56,7 @@ module.exports = (passport) => {
                 avatar: profile.photos[0].value,
                 password: password,
                 role: ["user"],
+                emailVerified: true,
               });
               return done(null, newUser);
             }

@@ -11,7 +11,6 @@ const csrf = require("csurf");
 const flash = require("connect-flash");
 
 const User = require("./models/user");
-const ViewUtil = require("./util/viewUtils");
 
 dotenv.config({ path: "./config/config.env" });
 require("./util/googlePassport")(passport);

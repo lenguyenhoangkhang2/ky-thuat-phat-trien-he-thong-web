@@ -61,6 +61,24 @@ router.post(
   authController.postSignup
 );
 
+router.post("/send-verify-user-email", authController.sendEmailVerify);
+
+router.get("/verify-email-by-token/:token", authController.verifyUserEmailByToken);
+
+router.post(
+  "/re-send-verify-user-email",
+  [
+    body("email")
+      .not()
+      .isEmpty()
+      .withMessage("Chưa nhập email")
+      .isEmail()
+      .withMessage("Đây không phải là email")
+      .trim(),
+  ],
+  authController.reSendVerifyUserEmailWhenError
+);
+
 router.post("/logout", authController.postLogout);
 
 router.get("/reset", authController.getReset);

@@ -380,7 +380,6 @@ exports.getCheckout = async (req, res, next) => {
       errorMessage: null,
       products: products,
       total: total,
-      stripeSessionId: session.id,
     });
   } catch (err) {
     const error = new Error(err);
@@ -389,21 +388,22 @@ exports.getCheckout = async (req, res, next) => {
   }
 };
 
-exports.getOrders = (req, res, next) => {
-  Order.find({ "user.userId": req.user._id })
-    .then((orders) => {
-      res.render("shop/orders", {
-        path: "/orders",
-        pageTitle: "Your Orders",
-        orders: orders,
-        error: null,
-      });
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+exports.getOrders = async (req, res, next) => {
+  try {
+    const orders = await Order.find({ "user.userId": req.user._id }).populate(
+      "user.userId"
+    );
+    res.render("shop/orders", {
+      path: "/orders",
+      pageTitle: "Your Orders",
+      orders: orders,
+      error: null,
     });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
 exports.cancelOrderOwner = async (req, res, next) => {

@@ -6,7 +6,6 @@
         <%- include('../includes/navigation.ejs') %>
             <main>
                 <div class="container bg-light bg-gradient pt-3 pb-3">
-                <% if (prods.length > 0) { %>
                     <div class="alert alert-info mb-4">
                         <h3 class="mb-0 fw-bold text-center text-uppercase">tất cả sản phẩm</h3>
                     </div>
@@ -62,10 +61,11 @@
                                 </select>
                             </div>
                             <div class="col-lg-2 mb-3 w-100">
-                                <button type="submit" class="btn btn-sm">Tìm kiếm</button>
+                                <button type="submit" class="btn btn-primary btn-sm">Tìm kiếm</button>
                             </div>
                         </div>
                     </form>
+                <% if (prods.length > 0) { %>
                     <div class="row">
                         <% for (let product of prods) { %>
                             <div class="col-lg-3">
@@ -84,7 +84,7 @@
                                             })%> 
                                             </div>
                                         </div>
-                                        <a href="/products/<%= product._id %>" class="btn">Details</a>
+                                        <a href="/products/<%= product._id %>" class="btn btn-primary">Details</a>
                                         <% if (isAuthenticated) { %>
                                             <%- include('../includes/add-to-cart.ejs', {product: product}) %>
                                         <% } %>

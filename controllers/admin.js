@@ -457,6 +457,7 @@ exports.returnOrder = async (req, res, next) => {
     if (order) {
       order.status = "Đã trả về";
       await order.save();
+      await sendMailOrderStatus(order);
     }
     res.redirect("/admin/orders");
   } catch (err) {
@@ -506,44 +507,8 @@ exports.updateOrder = async (req, res, next) => {
           break;
       }
 
-      const tableHtmlProducts = order.products.reduce((html, p) => {
-        return (html += `<tr>
-          <td>${p.product.name}</td>
-          <td>${p.quantity}</td>
-          <td>${p.product.discount > 0 ? p.product.discount + "%" : "không có"}</td>
-          <td class="price">${
-            p.product.price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + "đ"
-          }</td>
-        </tr>`);
-      }, "");
-
-      await sendMail({
-        to: order.user.userId.email,
-        subject: "Cập nhật đơn hàng",
-        htmlContent: `
-          <h2>Đơn hàng của bạn đã được cập nhật</h2>
-          <h3><strong>Mã đơn hàng: ${order._id}</strong><h3>
-          <h3>Trạng thái: ${order.status}, 
-              cập nhật lúc ${order.updatedAt.getHours()}:${order.updatedAt.getMinutes()} ${order.updatedAt.getDate()}/${order.updatedAt.getMonth()}/${order.updatedAt.getFullYear()}
-          </h3>
-          <table>
-            <thead>
-              <tr>
-                <th>Tên sản phẩm</th>
-                <th>Số lượng</th>
-                <th>Đã giảm giá</th>
-                <th>Giá</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${tableHtmlProducts}
-            </tbody>
-          </table>
-          <h4>Tổng tiền: ${order.total}</h4>
-        `,
-      });
-
       await order.save();
+      await sendMailOrderStatus(order);
     }
     res.redirect("/admin/orders");
   } catch (err) {
@@ -585,6 +550,7 @@ exports.cancelOrder = async (req, res, next) => {
       }
 
       await order.save();
+      await sendMailOrderStatus(order);
       return res.status(200).redirect("/orders");
     }
     res.status(404).redirect("/orders");
@@ -612,4 +578,45 @@ exports.getOrders = async (req, res, next) => {
     error.httpStatusCode = 500;
     return next(error);
   }
+};
+
+const sendMailOrderStatus = async (order) => {
+  const tableHtmlProducts = order.products.reduce((html, p) => {
+    return (html += `<tr>
+      <td style="border: 1px solid black;">${p.product.name}</td>
+      <td style="border: 1px solid black;">${p.quantity}</td>
+      <td style="border: 1px solid black;">${
+        p.product.discount > 0 ? p.product.discount + "%" : "không có"
+      }</td>
+      <td style="border: 1px solid black;">${
+        p.product.price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + "đ"
+      }</td>
+    </tr>`);
+  }, "");
+
+  await sendMail({
+    to: order.user.userId.email,
+    subject: "Cập nhật đơn hàng",
+    htmlContent: `
+      <h2>Đơn hàng của bạn đã được cập nhật</h2>
+      <h3><strong>Mã đơn hàng: ${order._id}</strong><h3>
+      <h3>Trạng thái: ${order.status}, 
+          cập nhật lúc ${order.updatedAt.getHours()}:${order.updatedAt.getMinutes()} ${order.updatedAt.getDate()}/${order.updatedAt.getMonth()}/${order.updatedAt.getFullYear()}
+      </h3>
+      <table style="border-collapse: collapse; border: 1px solid black;">
+        <thead>
+          <tr>
+            <th style="border: 1px solid black;">Tên sản phẩm</th>
+            <th style="border: 1px solid black;">Số lượng</th>
+            <th style="border: 1px solid black;">Đã giảm giá</th>
+            <th style="border: 1px solid black;">Giá</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${tableHtmlProducts}
+        </tbody>
+      </table>
+      <h4>Tổng tiền: ${order.total}</h4>
+    `,
+  });
 };
