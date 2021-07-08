@@ -4,21 +4,20 @@ const express = require("express");
 const { body } = require("express-validator");
 
 const adminController = require("../controllers/admin");
-const { isAdmin } = require("../middleware/auth");
 const { uploadImage } = require("../middleware/upload");
 
 const router = express.Router();
 
 // /admin/add-product => GET
-router.get("/add-product", isAdmin, adminController.getAddProduct);
+router.get("/add-product", adminController.getAddProduct);
 
 // /admin/products => GET
-router.get("/products", isAdmin, adminController.getProducts);
+router.get("/products", adminController.getProducts);
 
 // /admin/add-product => POST
 router.post(
   "/add-product",
-  isAdmin,
+
   uploadImage.fields([
     { name: "official", maxCount: 1 },
     { name: "slider", maxCount: 8 },
@@ -37,13 +36,13 @@ router.post(
   adminController.postAddProduct
 );
 
-router.get("/edit-header", isAdmin, adminController.getEditHeader);
+router.get("/edit-header", adminController.getEditHeader);
 
-router.get("/edit-header/:imageId", isAdmin, adminController.getUpdateHeaderImage);
+router.get("/edit-header/:imageId", adminController.getUpdateHeaderImage);
 
 router.post(
   "/update-header-image",
-  isAdmin,
+
   uploadImage.single("image"),
   [
     body("linkTo").not().isEmpty().withMessage("Yêu cầu một địa chỉ liên kết cho ảnh"),
@@ -52,13 +51,17 @@ router.post(
   adminController.updateHeaderImage
 );
 
+router.get("/accounts", adminController.getAllAccount);
+
+router.post("/accounts/add-admin-role", adminController.addAdminRole);
+
 router.get("/orders", adminController.getOrders);
 
-router.post("/delete-header-image", isAdmin, adminController.deleteHeaderImage);
+router.post("/delete-header-image", adminController.deleteHeaderImage);
 
 router.post(
   "/edit-header",
-  isAdmin,
+
   uploadImage.single("image"),
   [
     body("linkTo").not().isEmpty().withMessage("Yêu cầu một địa chỉ liên kết cho ảnh"),
@@ -67,11 +70,11 @@ router.post(
   adminController.addHeaderImage
 );
 
-router.get("/edit-product/:productId", isAdmin, adminController.getEditProduct);
+router.get("/edit-product/:productId", adminController.getEditProduct);
 
 router.post(
   "/edit-product",
-  isAdmin,
+
   uploadImage.fields([
     { name: "official", maxCount: 1 },
     { name: "slider", maxCount: 8 },
@@ -96,6 +99,6 @@ router.get("/cancel-order/:orderId", adminController.cancelOrder);
 
 router.get("/return-order/:orderId", adminController.returnOrder);
 
-router.delete("/product/:productId", isAdmin, adminController.deleteProduct);
+router.delete("/product/:productId", adminController.deleteProduct);
 
 module.exports = router;

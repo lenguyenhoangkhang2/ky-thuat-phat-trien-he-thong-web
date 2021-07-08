@@ -11,6 +11,7 @@ const csrf = require("csurf");
 const flash = require("connect-flash");
 
 const User = require("./models/user");
+const { isAdmin } = require("./middleware/auth");
 
 dotenv.config({ path: "./config/config.env" });
 require("./util/googlePassport")(passport);
@@ -81,7 +82,7 @@ const authRoutes = require("./routes/auth");
 const oauth2Routes = require("./routes/oauth2");
 const userRoutes = require("./routes/user");
 
-app.use("/admin", adminRoutes);
+app.use("/admin", isAdmin, adminRoutes);
 app.use(shopRoutes);
 app.use(authRoutes);
 app.use(oauth2Routes);

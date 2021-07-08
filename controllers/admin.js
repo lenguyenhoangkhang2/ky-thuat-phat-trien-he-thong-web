@@ -624,6 +624,41 @@ exports.getOrders = async (req, res, next) => {
   }
 };
 
+exports.getAllAccount = async (req, res, next) => {
+  try {
+    const accounts = await User.find();
+    res.render("admin/accounts", {
+      path: "/admin/accounts",
+      pageTitle: "QL Tài Khoản",
+      hasError: false,
+      accounts: accounts,
+    });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
+};
+
+exports.addAdminRole = async (req, res, next) => {
+  const userId = req.body.id;
+  try {
+    const user = await User.findById(userId);
+    if (user.roles.includes("admin")) {
+      throw new Error("Tài khoản đã có quyền admin");
+    }
+
+    user.roles.push("admin");
+    await user.save();
+
+    res.redirect("/admin/accounts");
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
+};
+
 const sendMailOrderStatus = async (order) => {
   const tableHtmlProducts = order.products.reduce((html, p) => {
     return (html += `<tr>

@@ -1,0 +1,53 @@
+<%- include('../includes/head.ejs') %>
+    <link rel="stylesheet" href="/css/product.css">
+    </head>
+
+    <body>
+        <%- include('../includes/navigation.ejs') %>
+            <main>
+              <div class="container-fluid">
+                <div class="alert alert-info text-center">
+                  <h2 class="mb-0 fw-bold">DANH SÁCH TÀI KHOẢN</h2>
+                </div>
+                <table class="table table-bordered table-striped">
+                  <thead>
+                    <tr class="text-center">
+                      <th>Tên người dùng</th>
+                      <th>Email</th>
+                      <th>Số điện thoại</th>
+                      <th>Địa chỉ liên hệ</th>
+                      <th>Quyền</th>
+                      <th>Thêm quyền admin</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% accounts.forEach((user) => { %>
+                      <tr>
+                        <td><%= user.name %></td>
+                        <td><%= user.email %></td>
+                        <td><%= user.contact.phone %></td>
+                        <td>
+                          <% if(user.contact.detail !== "" && user.contact.district !== "" && user.contact.province !== "" && user.contact.country !== "") { %> 
+                            <%= user.contact.detail + ", " + user.contact.district + ", " + user.contact.province + ", " + user.contact.country %>
+                          <% } %>
+                        </td>
+                        <td><%= user.roles.toString() %></td>
+                        <td class="text-center">
+                          <% if(!user.roles.includes("admin")) { %> 
+                            <form action="/admin/accounts/add-admin-role" method="POST">
+                              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                              <input type="hidden" name="id" value="<%= user._id %>">
+                              <button class="btn btn-primary" type="submit">Thêm</button>
+                            </form>
+                          <% } else { %> 
+                            Is Admin
+                          <% } %> 
+                        </td>
+                      </tr>
+                    <% }) %>
+                  </tbody>
+                </table>
+              </div>
+            </main>
+            <%- include('../includes/end.ejs') %>
+            <script src="/js/admin.js"></script>
