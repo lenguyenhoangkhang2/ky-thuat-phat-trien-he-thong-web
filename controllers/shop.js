@@ -53,13 +53,16 @@ exports.getProducts = async (req, res, next) => {
       break;
   }
 
-  const query = queryString.stringify({
-    n: req.query.n,
-    c: req.query.c,
-    b: req.query.b,
-    s: req.query.s,
-    p: req.query.p,
-  });
+  let query = "";
+  if (req.query.n || req.query.c || req.query.b || req.query.s || req.query.p) {
+    query = queryString.stringify({
+      n: req.query.n,
+      c: req.query.c,
+      b: req.query.b,
+      s: req.query.s,
+      p: req.query.p,
+    });
+  }
 
   try {
     const allProducts = await Product.find();
@@ -152,10 +155,9 @@ exports.getProducts = async (req, res, next) => {
       prods: productPage,
       pageTitle: "Products",
       path: "/products",
-      currentPage: page,
       query: query,
-      hasFilter: query ? true : false,
-      filter: queryString.parse(query),
+      filter: query ? queryString.parse(query) : "",
+      currentPage: page,
       totalItems: allProductsWithFilter.length,
       itemPerPage: ITEM_PER_PAGE,
     });

@@ -14,17 +14,15 @@
                             <div class="col-lg-4 mb-3">
                                 <label class="form-label fw-bold" for="name">Tên sản phẩm</label>
                                 <input name="n" id="name" type="text" class="form-control"
-                                    <% if(hasFilter) { %> 
-                                        value=<%= filter.n %> 
-                                    <% } %> 
+                                        value=<% if(filter) { %><%= filter.n %><% } %> 
                                 >
                             </div>
                             <div class="col-lg-2 mb-3">
                                 <label class="form-label fw-bold" for="category">Loại sản phẩm</label>
                                 <select name="c" class="form-select" id="category">
                                     <option value="">Tất cả</option>
-                                    <option value="Laptop" <% if(hasFilter) { if(filter.c === "Laptop") { %>selected<% } } %>>Laptop</option>
-                                    <option value="Điện thoại" <% if(hasFilter) { if(filter.c === "Điện thoại") { %>selected<% } } %>>Điện thoại</option>   
+                                    <option value="Laptop" <% if(filter) { if(filter.c === "Laptop") { %>selected<% } } %>>Laptop</option>
+                                    <option value="Điện thoại" <% if(filter) { if(filter.c === "Điện thoại") { %>selected<% } } %>>Điện thoại</option>   
                                 </select>
                             </div>
                             <div class="col-lg-2 mb-3">
@@ -37,27 +35,27 @@
                                 <select name="b" class="form-select" id="brand">
                                     <option value="">Tất cả</option>
                                     <% brands.forEach(brand => { %> 
-                                        <option value="<%= brand %>" <% if(hasFilter) { if(filter.b === brand) { %>selected<% } } %>><%= brand %></option>
+                                        <option value="<%= brand %>" <% if(filter) { if(filter.b === brand) { %>selected<% } } %>><%= brand %></option>
                                         <% }); %>    
                                     </select>
                                 </div>
                                 <div class="col-lg-2  mb-3">
                                     <label class="form-label fw-bold" for="price">Giá</label>
                                     <select name="p" class="form-select" id="price">
-                                        <option value='{"min":0,"max":"Infinity"}' <% if(hasFilter) { if(filter.p === '{"min":0,"max":"Infinity"}') { %>selected<% } } %>>Tất cả</option>
-                                        <option value='{"min":0,"max":5000000}' <% if(hasFilter) { if(filter.p === '{"min":0,"max":5000000}') { %>selected<% } } %>>Ít hơn 5 Triệu</option>   
-                                        <option value='{"min":5000000,"max":10000000}' <% if(hasFilter) { if(filter.p === '{"min":5000000,"max":10000000}') { %>selected<% } } %>>5 - 10 triệu</option>
-                                        <option value='{"min":10000000,"max":20000000}' <% if(hasFilter) { if(filter.p === '{"min":10000000,"max":20000000}') { %>selected<% } } %>>10 - 20 triệu</option>
-                                        <option value='{"min":20000000,"max":"Infinity"}' <% if(hasFilter) { if(filter.p === '{"min":20000000,"max":"Infinity"}') { %>selected<% } } %>>Lớn hơn 20 triệu</option>
+                                        <option value='{"min":0,"max":"Infinity"}' <% if(filter) { if(filter.p === '{"min":0,"max":"Infinity"}') { %>selected<% } } %>>Tất cả</option>
+                                        <option value='{"min":0,"max":5000000}' <% if(filter) { if(filter.p === '{"min":0,"max":5000000}') { %>selected<% } } %>>Ít hơn 5 Triệu</option>   
+                                        <option value='{"min":5000000,"max":10000000}' <% if(filter) { if(filter.p === '{"min":5000000,"max":10000000}') { %>selected<% } } %>>5 - 10 triệu</option>
+                                        <option value='{"min":10000000,"max":20000000}' <% if(filter) { if(filter.p === '{"min":10000000,"max":20000000}') { %>selected<% } } %>>10 - 20 triệu</option>
+                                        <option value='{"min":20000000,"max":"Infinity"}' <% if(filter) { if(filter.p === '{"min":20000000,"max":"Infinity"}') { %>selected<% } } %>>Lớn hơn 20 triệu</option>
                                     </select>
                                 </div>
                                 <div class="col-lg-2 mb-3">
                                 <label class="form-label fw-bold" for="sortBy">Sắp xếp theo</label>
                                 <select name="s" class="form-select" id="sortBy">
-                                    <option value="new" <% if(hasFilter) { if(filter.s === "new") { %>selected<% } } %>>Mới nhất</option>
-                                    <option value="priceAsc" <% if(hasFilter) { if(filter.s === "priceAsc") { %>selected<% } } %>>Giá thấp đến cao</option>
-                                    <option value="priceDesc" <% if(hasFilter) { if(filter.s === "priceDesc") { %>selected<% } } %>>Giá cao đến thấp</option>   
-                                    <option value="discount" <% if(hasFilter) { if(filter.s === "discount") { %>selected<% } } %>>Đang giảm giá</option> 
+                                    <option value="new" <% if(filter) { if(filter.s === "new") { %>selected<% } } %>>Mới nhất</option>
+                                    <option value="priceAsc" <% if(filter) { if(filter.s === "priceAsc") { %>selected<% } } %>>Giá thấp đến cao</option>
+                                    <option value="priceDesc" <% if(filter) { if(filter.s === "priceDesc") { %>selected<% } } %>>Giá cao đến thấp</option>   
+                                    <option value="discount" <% if(filter) { if(filter.s === "discount") { %>selected<% } } %>>Đang giảm giá</option> 
                                 </select>
                             </div>
                             <div class="col-lg-2 mb-3 w-100">
@@ -75,8 +73,10 @@
                                         <h5 class="card-title mt-3"><%= product.name %></h5>
                                         <h6 class="card-text mb-0">
                                             <span class="fw-bold price"><%= product.priceWithDiscount %></span>
-                                            <small class="text-decoration-line-through price"><%= product.price %></small>
-                                            <span class="badge bg-danger"><%= product.discount > 0 ? "-" + product.discount + "%" : "" %></span>
+                                            <% if(product.discount > 0) { %>
+                                                <small class="text-decoration-line-through price"><%= product.price %></small>
+                                                <span class="badge bg-danger"><%= "-" + product.discount + "%" %></span>
+                                            <% } %>
                                         </h6>
                                         <div class="row" <%= !product.avgRating ? 'style=visibility:hidden;' : "" %>>
                                             <div class="col-12 rating-container">

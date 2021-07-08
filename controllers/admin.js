@@ -4,7 +4,10 @@ const Product = require("../models/product");
 const HeaderImage = require("../models/headerImage");
 const { sendMail } = require("../util/mail");
 const File = require("../util/file");
+const User = require("../models/user");
 const Order = require("../models/order");
+const queryString = require("query-string");
+const { path } = require("pdfkit");
 
 exports.getAddProduct = (req, res, next) => {
   res.render("admin/edit-product", {
@@ -562,16 +565,57 @@ exports.cancelOrder = async (req, res, next) => {
 };
 
 exports.getOrders = async (req, res, next) => {
+  const ITEM_PER_PAGE = 2;
+
+  const page = +req.query.page || 1;
+  const email = req.query.e ? new RegExp(`.*${req.query.e}.*`, "i") : /.*/;
+  const status = req.query.s || /.*/;
+
+  let query = "";
+  if (req.query.e || req.query.s) {
+    query = queryString.stringify({
+      e: req.query.e,
+      s: req.query.s,
+    });
+  }
+
+  const lookup = {
+    from: User.collection.name,
+    localField: "user.userId",
+    foreignField: "_id",
+    as: "user.userId",
+  };
+
   try {
-    const orders = await Order.find().populate("user.userId").sort({
+    let orders = await Order.aggregate([
+      { $lookup: lookup },
+      { $unwind: "$user.userId" },
+      {
+        $match: {
+          "user.userId.email": email,
+          status: status,
+        },
+      },
+    ]).sort({
       createdAt: -1,
     });
 
-    res.render("shop/orders", {
+    const total = orders.length;
+    orders = orders.slice(
+      (page - 1) * ITEM_PER_PAGE,
+      (page - 1) * ITEM_PER_PAGE + ITEM_PER_PAGE
+    );
+
+    res.render("admin/orders", {
       path: "/admin/orders",
       pageTitle: "Admin Orders",
       orders: orders,
       error: null,
+      query: query,
+      filter: query ? queryString.parse(query) : null,
+      currentPage: page,
+      totalItems: total,
+      itemPerPage: ITEM_PER_PAGE,
     });
   } catch (err) {
     const error = new Error(err);

@@ -9,29 +9,29 @@
     <ul class="pagination">
         <% if(currentPage !== 1 && previousPage !== 1) {%>
             <li class="page-item">
-                <a class="page-link" href="?page=1<% if(hasFilter) { %>&<%= query %><% } %>">1</a>
+                <a class="page-link" href="?page=1&<%= query %>">1</a>
             </li>
         <% } %> 
       
         <% if(hasPreviousPage) {%>
             <li class="page-item">
-                <a class="page-link" href="?page=<%= previousPage %><% if(hasFilter) { %>&<%= query %><% } %>"><%= previousPage %></a>
+                <a class="page-link" href="?page=<%= previousPage %>&<%= query %>"><%= previousPage %></a>
             </li>
         <% } %> 
 
         <li class="page-item">
-            <a class="page-link active" href="?page=<%= currentPage %><% if(hasFilter) { %>&<%= query %><% } %>"><%= currentPage %></a>
+            <a class="page-link active" href="?page=<%= currentPage %>&<%= query %>"><%= currentPage %></a>
         </li>
       
         <% if(hasNextPage) {%>
             <li class="page-item">
-                <a class="page-link" href="?page=<%= nextPage %><% if(hasFilter) { %>&<%= query %><% } %>"><%= nextPage %></a>
+                <a class="page-link" href="?page=<%= nextPage %>&<%= query %>"><%= nextPage %></a>
             </li>
         <% } %> 
             
         <% if(lastPage !== currentPage && lastPage !== nextPage) { %> 
             <li class="page-item">
-                <a class="page-link" href="?page=<%= lastPage %><% if(hasFilter) { %>&<%= query %><% } %>"><%= lastPage %></a>
+                <a class="page-link" href="?page=<%= lastPage %>&<%= query %>"><%= lastPage %></a>
             </li>
         <% } %> 
     </ul>
