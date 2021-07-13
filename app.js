@@ -72,6 +72,9 @@ app.use((req, res, next) => {
   if (req.user) {
     res.locals.isAdmin = req.user.roles.includes("admin");
     res.locals.username = req.user.name;
+  } else {
+    res.locals.isAdmin = false;
+    res.locals.username = false;
   }
   next();
 });
