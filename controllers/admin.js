@@ -512,8 +512,8 @@ exports.updateOrder = async (req, res, next) => {
 
       await order.save();
       await sendMailOrderStatus(order);
+      res.redirect("/admin/orders");
     }
-    res.redirect("/admin/orders");
   } catch (err) {
     const error = new Error(err);
     error.httpStatusCode = 500;
@@ -526,37 +526,31 @@ exports.cancelOrder = async (req, res, next) => {
   try {
     const order = await Order.findOne({ _id: orderId });
     if (order) {
+      // Trường hợp đã hủy hoặc đã nhận trước đó
       if (["Đã hủy", "Đã nhận"].includes(order.status)) {
-        const error = {
-          message:
-            order.status === "Đã hủy"
-              ? "Đơn hàng đã hủy trước đó"
-              : "Không thể thực hiện hủy với đơn hàng đã nhận",
-          orderId: orderId,
-        };
-
-        const orders = await Order.find({ "user.userId": req.user._id });
-        return res.render("shop/orders", {
-          path: "/orders",
-          pageTitle: "Your Orders",
-          orders: orders,
-          error: error,
-        });
+        return res.status(404).redirect("/admin/orders");
       }
 
-      await order.populate("products.product.productId").execPopulate();
+      await order
+        .populate("products.product.productId")
+        .populate("user.userId")
+        .execPopulate();
+
       order.status = "Đã hủy";
-      for await (const p of order.products) {
+      await order.save();
+
+      // Trả lại số lượng sản phẩm
+      for (const p of order.products) {
         const product = p.product.productId;
         product.quantity += p.quantity;
-        product.save();
+        await product.save();
       }
 
-      await order.save();
+      // Gửi mail xác nhận
       await sendMailOrderStatus(order);
-      return res.status(200).redirect("/orders");
+      return res.status(200).redirect("/admin/orders");
     }
-    res.status(404).redirect("/orders");
+    res.status(404).redirect("/admin/orders");
   } catch (err) {
     const error = new Error(err);
     error.httpStatusCode = 500;
