@@ -114,6 +114,10 @@ userSchema.methods.removeFromCart = async function (productId) {
     return cp.productId.toString() === productId.toString();
   });
 
+  if (cartProductIndex === -1) {
+    return;
+  }
+
   try {
     const product = await Product.findById(productId);
     product.quantity += this.cart.items[cartProductIndex].quantity;

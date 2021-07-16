@@ -32,14 +32,10 @@ const orderSchema = new Schema(
         "Đã hủy",
       ],
     },
-    total: {
-      type: Number,
-      required: true,
-    },
     method: {
       type: String,
       required: true,
-      enum: ["Stripe", "Cod"],
+      enum: ["Cod"],
     },
     user: {
       address: {

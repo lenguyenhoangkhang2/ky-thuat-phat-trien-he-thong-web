@@ -121,6 +121,7 @@ exports.sendEmailVerify = async (req, res, next) => {
   try {
     const user = await User.findOne({ email: email });
     if (!user) {
+      // Hiển thị lại thông tin đã nhập trước đó
       return res.status(442).render("auth/login", {
         path: "/login",
         pageTitle: "Login",
@@ -221,7 +222,7 @@ exports.reSendVerifyUserEmailWhenError = async (req, res, next) => {
     const token = await jwtToken.generate(
       { email: email },
       process.env.VERIFY_USER_EMAIL_SECRET,
-      "30000"
+      "20m"
     );
 
     await sendMail({
@@ -246,7 +247,7 @@ exports.reSendVerifyUserEmailWhenError = async (req, res, next) => {
   }
 };
 
-exports.postSignup = (req, res, next) => {
+exports.postSignup = async (req, res, next) => {
   const name = req.body.name;
   const email = req.body.email;
   const password = req.body.password;
@@ -267,31 +268,40 @@ exports.postSignup = (req, res, next) => {
     });
   }
 
-  bcrypt
-    .hash(password, 12)
-    .then((hashedPassword) => {
-      const user = new User({
-        email: email,
-        password: hashedPassword,
-        name: name,
-        cart: { items: [] },
-      });
-
-      return user.save();
-    })
-    .then(() => {
-      res.redirect("/login");
-      return sendMail(
-        email,
-        "Đăng ký thành công",
-        "Bạn đã đang ký tài khoản website thành công"
-      );
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+  try {
+    const hashedPassword = await bcrypt.hash(password, 12);
+    const user = new User({
+      email: email,
+      password: hashedPassword,
+      name: name,
+      cart: { items: [] },
     });
+
+    await user.save();
+
+    const token = await jwtToken.generate(
+      { email: email },
+      process.env.VERIFY_USER_EMAIL_SECRET,
+      "20m"
+    );
+
+    await sendMail({
+      to: email,
+      subject: "Xác nhận email Shop NodeJS",
+      htmlContent: `
+      <h3>Nhấn vào <a href='${req.headers.origin}/verify-email-by-token/${token}'>đường dẫn</a> để xác nhận email của bạn</h3>
+      `,
+    });
+
+    res.render("auth/signup-success", {
+      path: "/signup",
+      pageTitle: "Signup",
+    });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
 exports.postLogout = (req, res, next) => {
@@ -301,7 +311,7 @@ exports.postLogout = (req, res, next) => {
   });
 };
 
-exports.getReset = (req, res, next) => {
+exports.getResetPassword = (req, res, next) => {
   let message = req.flash("error");
   if (message.length > 0) {
     message = message[0];
@@ -316,7 +326,7 @@ exports.getReset = (req, res, next) => {
   });
 };
 
-exports.postReset = (req, res, next) => {
+exports.postResetPassword = (req, res, next) => {
   crypto.randomBytes(32, async (err, buffer) => {
     if (err) {
       console.log(err);
@@ -327,7 +337,7 @@ exports.postReset = (req, res, next) => {
     try {
       const user = await User.findOne({ email: req.body.email });
       if (!user) {
-        req.flash("error", "No account with that email found!");
+        req.flash("error", "Không tìm thấy email!");
         return res.redirect("/reset");
       }
 
@@ -338,7 +348,7 @@ exports.postReset = (req, res, next) => {
         to: req.body.email,
         subject: "Password Reset",
         htmlContent: `<p>You requested a password reset.</p>
-        <p>Click this <a href="http://localhost:3000/reset/${token}">link reset password</a> to set new password.</p>`,
+        <p>Click this <a href="${req.headers.origin}/reset/${token}">link reset password</a> to set new password.</p>`,
       });
 
       res.redirect("/login");
@@ -350,62 +360,67 @@ exports.postReset = (req, res, next) => {
   });
 };
 
-exports.getNewPassword = (req, res, next) => {
+exports.getNewPassword = async (req, res, next) => {
   const token = req.params.token;
-  User.findOne({
-    resetToken: token,
-    resetTokenExpiration: { $gt: Date.now() },
-  })
-    .then((user) => {
-      let message = req.flash("error");
-      if (message.length > 0) {
-        message = message[0];
-      } else {
-        message = null;
-      }
 
-      res.render("auth/new-password", {
-        path: "/new-password",
-        pageTitle: "New Password",
-        errorMessage: message,
-        userId: user._id.toString(),
-        passwordToken: token,
-      });
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+  try {
+    const user = await User.findOne({
+      resetToken: token,
+      resetTokenExpiration: { $gt: Date.now() },
     });
+
+    if (!user) {
+      req.flash(
+        "error",
+        "Mã xử lý đỗi mật khẩu không chính xác hoặc hết hạn! Gửi lại email xác nhận đổi mật khẩu khác"
+      );
+      return res.redirect("/reset");
+    }
+
+    let message = req.flash("error");
+    if (message.length > 0) {
+      message = message[0];
+    } else {
+      message = null;
+    }
+
+    res.render("auth/new-password", {
+      path: "/new-password",
+      pageTitle: "New Password",
+      errorMessage: message,
+      userId: user._id.toString(),
+      passwordToken: token,
+    });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
-exports.postNewPassword = (req, res, next) => {
+exports.postNewPassword = async (req, res, next) => {
   const newPassword = req.body.password;
   const userId = req.body.userId;
   const passwordToken = req.body.passwordToken;
-  let resetUser;
 
-  User.findOne({
-    resetToken: passwordToken,
-    resetTokenExpiration: { $gt: Date.now() },
-    _id: userId,
-  })
-    .then((user) => {
-      resetUser = user;
-      return bcrypt.hash(newPassword, 12);
-    })
-    .then((hashedPassword) => {
-      resetUser.password = hashedPassword;
-      resetUser.resetToken = undefined;
-      resetUser.resetTokenExpiration = undefined;
-      return resetUser.save();
-    })
-    .then((result) => {
-      res.redirect("/login");
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+  try {
+    const user = await User.findOne({
+      resetToken: passwordToken,
+      resetTokenExpiration: { $gt: Date.now() },
+      _id: userId,
     });
+
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    user.password = hashedPassword;
+    user.resetToken = undefined;
+    user.resetTokenExpiration = undefined;
+    await user.save();
+
+    res.redirect("/login");
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };

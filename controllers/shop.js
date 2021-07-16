@@ -13,6 +13,13 @@ const HeaderImage = require("../models/headerImage");
 const ITEM_PER_PAGE = 2;
 
 exports.getProducts = async (req, res, next) => {
+  let message = req.flash("error");
+  if (message.length > 0) {
+    message = message[0];
+  } else {
+    message = null;
+  }
+
   const page = +req.query.page || 1;
   const name = req.query.n ? new RegExp(`.*${req.query.n}.*`, "i") : /.*/;
   const category = req.query.c || /.*/;
@@ -158,6 +165,7 @@ exports.getProducts = async (req, res, next) => {
       query: query,
       filter: query ? queryString.parse(query) : "",
       currentPage: page,
+      errorMessage: message,
       totalItems: allProductsWithFilter.length,
       itemPerPage: ITEM_PER_PAGE,
     });
@@ -270,15 +278,22 @@ exports.getCart = (req, res, next) => {
     });
 };
 
-exports.postCart = (req, res, next) => {
+exports.postCart = async (req, res, next) => {
   const prodId = req.body.productId;
-  Product.findById(prodId)
-    .then((product) => {
-      return req.user.addToCart(product);
-    })
-    .then((result) => {
-      res.redirect("/cart");
-    });
+  try {
+    const product = await Product.findById(prodId);
+    await req.user.addToCart(product);
+    res.redirect("/cart");
+  } catch (err) {
+    if ((err.message = "Sản phẩm đã có trong giỏ hàng")) {
+      req.flash("error", err.message);
+      return res.redirect("/products");
+    }
+
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
 exports.updateCartQuantity = async (req, res, next) => {

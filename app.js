@@ -1,6 +1,5 @@
 const dotenv = require("dotenv");
 const path = require("path");
-const queryString = require("query-string");
 
 const express = require("express");
 const mongoose = require("mongoose");
@@ -36,10 +35,15 @@ app.use(
     secret: "my secret",
     resave: false,
     saveUninitialized: false,
-    store: new MongoDBStore({
-      uri: MONGODB_URI,
-      collection: "sessions",
-    }),
+    //Lưu session vào cookie
+    cookie: { maxAge: 60 * 60 * 1000 },
+
+    // Lưu session vào database
+    // store: new MongoDBStore({
+    //   uri: MONGODB_URI,
+    //   collection: "sessions",
+    //   expires: 60*60*1000,
+    // }),
   })
 );
 app.use(csrfProtection);

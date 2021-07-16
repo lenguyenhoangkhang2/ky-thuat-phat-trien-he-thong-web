@@ -8,47 +8,45 @@
             <div class="container">
                 <% if (products.length > 0) { %>
                 <div class="row justify-content-center">
-                    <dic class="col-8">
+                    <dic class="col-6">
                         <div class="card">
+                            <div class="card-header bg-warning">
+                                <h3 class="mb-0 pt-2 pb-2 fw-bold text-center">Giỏ Hàng</h3>
+                            </div>
                             <div class="card-body">
-                                <div class="alert alert-primary">
-                                    <h3 class="mb-0 fw-bold text-center">Giỏ hàng</h3>
-                                    <div id="error-message"></div>
-                                    <% products.forEach(p => { %>
-                                        <div class="cart-item pt-3 pb-3">
-                                            <div class="row">
-                                                <div class="col-2">
-                                                    <img src="<%= p.productId.imageUrl.official %>" class="w-100" alt="productImage" />
-                                                </div>
-                                                <div class="col-8">
-                                                    <strong><%= p.productId.name %></strong><br>
-                                                    <span class="cart-item-price" data-price="<%= p.productId.getPriceWithDiscount() %>"><%= p.productId.formatDiscountPrice() %></span><br/>
-                                                    Số lượng: <input name="quantity" style="width: 80px;" type="number" min="1" step="1" value="<%= p.quantity %>"/>
+                                <div id="error-message"></div>
+                                <% products.forEach(p => { %>
+                                    <div class="cart-item p-2 mb-2">
+                                        <div class="row">
+                                            <div class="col-3">
+                                                <img src="<%= p.productId.imageUrl.official %>" class="w-100" alt="productImage" />
+                                            </div>
+                                            <div class="col-7">
+                                                <h5><strong><%= p.productId.name %></strong></h5>
+                                                <span class="cart-item-price" data-price="<%= p.productId.getPriceWithDiscount() %>"><%= p.productId.formatDiscountPrice() %></span><br/>
+                                                Số lượng: <input name="quantity" style="width: 80px;" type="number" min="1" step="1" value="<%= p.quantity %>"/>
+                                                <input name="productId" type="hidden" value="<%= p.productId._id %>"/>
+                                            </div>
+                                            <div class="col-2 text-end">    
+                                                <form action="/cart-delete-item" method="POST">
                                                     <input name="productId" type="hidden" value="<%= p.productId._id %>"/>
-                                                </div>
-                                                <div class="col-2 text-end">    
-                                                    <form action="/cart-delete-item" method="POST">
-                                                        <input name="productId" type="hidden" value="<%= p.productId._id %>"/>
-                                                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                                        <button type="submit" class="btn btn-sm">Xóa</button>
-                                                    </form>
-                                                </div>
+                                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                    <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                                                </form>
                                             </div>
                                         </div>
-                                        <hr>
-                                    <% }) %>
-                                    <div class="row">
-                                        <div class="col-12">
-                                            <span id="total"></span>
-                                        </div>
+                                    </div>
+                                    <hr/>
+                                <% }) %>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <span id="total"></span>
                                     </div>
                                 </div>
-                                <div class="row">
-                                    <div class="col-3 text-end">
+                                <div class="row justify-content-end">
                                         <a href="/checkout" class="btn btn-primary w-100">
                                             Thanh toán
                                         </a>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -80,7 +78,7 @@
 
                     total = total.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + "đ";
 
-                    document.querySelector("#total").innerHTML = `<h5>Tổng tiền: ${total}</h5>`;
+                    document.querySelector("#total").innerHTML = `<h5 class="text-end text-danger"><strong>Tổng tiền: ${total}<strong></h5>`;
                 } 
                 updateTotal();
 

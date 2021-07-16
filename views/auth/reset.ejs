@@ -7,17 +7,30 @@
    <%- include('../includes/navigation.ejs') %>
 
     <main>
-        <% if(errorMessage) { %> 
-            <div class="user-message user-message--error"><%= errorMessage %></div>
-        <% } %> 
-        <form class="login-form" action="/reset" method="POST">
-            <div class="form-control">
-                <label for="email">E-Mail</label>
-                <input type="email" name="email" id="email">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0 text-center">Đổi mật khẩu tài khoản</h4>
+                        </div>
+                        <div class="card-body">
+                            <% if(errorMessage) { %> 
+                                <div class="alert alert-danger"><%= errorMessage %></div>
+                            <% } %> 
+                            <form action="/reset" method="POST">
+                                <div class="form-group mb-2">
+                                    <label class="form-label" for="email">E-Mail tài khoản</label>
+                                    <input class="form-control" type="email" name="email" id="email">
+                                </div>
+                    
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <button class="btn btn-primary" type="submit">Gửi email đổi mật khẩu</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-            <button class="btn" type="submit">Reset Password</button>
-        </form>
+        </div>
     </main>
 <%- include('../includes/end.ejs') %>

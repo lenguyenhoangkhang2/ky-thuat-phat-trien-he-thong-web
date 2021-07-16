@@ -14,11 +14,8 @@ router.get("/signup", isGuest, authController.getSignup);
 router.post(
   "/login",
   [
-    body("email")
-      .isEmail()
-      .withMessage("Please enter a valid email address.")
-      .normalizeEmail(),
-    body("password", "Password has to be valid.")
+    body("email").isEmail().withMessage("Email không hợp lệ.").normalizeEmail(),
+    body("password", "Mật khẩu yêu cầu chữ cái hoặc số, ít nhất 5 ký tự")
       .isLength({ min: 5 })
       .isAlphanumeric()
       .trim(),
@@ -32,7 +29,7 @@ router.post(
     body("name").not().isEmpty().withMessage("Nhập tên của bạn"),
     body("email")
       .isEmail()
-      .withMessage("Please enter a valid email.")
+      .withMessage("Email không hợp lệ.")
       .custom((value, { req }) => {
         // if (value === "hoangkhang887@gmail.com") {
         //   throw new Error("This email address if forbidden.");
@@ -40,7 +37,7 @@ router.post(
         // return true;
         return User.findOne({ email: value }).then((userDoc) => {
           if (userDoc) {
-            return Promise.reject("E-mail exists already, please pick a different one");
+            return Promise.reject("E-mail đã đăng ký, vui lòng chọn email khác");
           }
         });
       })
@@ -81,9 +78,9 @@ router.post(
 
 router.post("/logout", authController.postLogout);
 
-router.get("/reset", authController.getReset);
+router.get("/reset", authController.getResetPassword);
 
-router.post("/reset", authController.postReset);
+router.post("/reset", authController.postResetPassword);
 
 router.get("/reset/:token", authController.getNewPassword);
 

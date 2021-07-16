@@ -37,10 +37,10 @@
         <ul class="main-header__item-list">
             <% if (!isAuthenticated) { %>
                 <li class="main-header__item">
-                    <a class="<%= path === '/login' ? 'active' : '' %>" href="/login">Login</a>
+                    <a class="<%= path === '/login' ? 'active' : '' %>" href="/login">Đăng nhập</a>
                 </li>
                 <li class="main-header__item">
-                    <a class="<%= path === '/signup' ? 'active' : '' %>" href="/signup">Signup</a>
+                    <a class="<%= path === '/signup' ? 'active' : '' %>" href="/signup">Đăng ký</a>
                 </li>
             <% } else { %>
                 <li class="main-header__item">
@@ -49,7 +49,7 @@
                 <li class="main-header__item">
                     <form action="/logout" method="post">
                         <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                        <button type="submit">Logout</button>
+                        <button type="submit">Đăng xuất</button>
                     </form>
                 </li>
             <% } %>
@@ -83,16 +83,16 @@
         <% } %>
         <% if (!isAuthenticated) { %>
             <li class="mobile-nav__item">
-                <a class="<%= path === '/login' ? 'active' : '' %>" href="/login">Login</a>
+                <a class="<%= path === '/login' ? 'active' : '' %>" href="/login">Đăng nhập</a>
             </li>
             <li class="mobile-nav__item">
-                <a class="<%= path === '/signup' ? 'active' : '' %>" href="/signup">Signup</a>
+                <a class="<%= path === '/signup' ? 'active' : '' %>" href="/signup">Đăng ký</a>
             </li>
         <% } else { %>
             <li class="mobile-nav__item">
                 <form action="/logout" method="post">
                     <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                    <button type="submit">Logout</button>
+                    <button type="submit">Đăng xuất</button>
                 </form>
             </li>
         <% } %>
