@@ -126,6 +126,7 @@ mongoose
   .connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log("Database is connected");
+    console.log(`Open website http://localhost:${PORT}`);
     app.listen(PORT);
   })
   .catch((err) => {
