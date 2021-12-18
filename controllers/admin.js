@@ -471,7 +471,9 @@ exports.returnOrder = async (req, res, next) => {
   const orderId = req.params.orderId;
 
   try {
-    const order = await Order.findOne({ _id: orderId, status: "Đang vận chuyển" });
+    const order = await Order.findById(orderId);
+    await order.populate("user.userId").execPopulate();
+
     if (order) {
       order.status = "Đã trả về";
       await order.save();
@@ -670,6 +672,10 @@ exports.addAdminRole = async (req, res, next) => {
 
 const sendMailOrderStatus = async (order) => {
   const tableHtmlProducts = order.products.reduce((html, p) => {
+    const price =
+      Math.round((p.product.price * (1 - p.product.discount / 100)) / 10000) *
+      10000;
+
     return (html += `<tr>
       <td style="border: 1px solid black;">${p.product.name}</td>
       <td style="border: 1px solid black;">${p.quantity}</td>
@@ -677,7 +683,7 @@ const sendMailOrderStatus = async (order) => {
         p.product.discount > 0 ? p.product.discount + "%" : "không có"
       }</td>
       <td style="border: 1px solid black;">${
-        p.product.price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + "đ"
+        price.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + "đ"
       }</td>
     </tr>`);
   }, "");
@@ -704,7 +710,12 @@ const sendMailOrderStatus = async (order) => {
           ${tableHtmlProducts}
         </tbody>
       </table>
-      <h4>Tổng tiền: ${order.total}</h4>
+      <h4>Tổng tiền: ${
+        order
+          .getTotalPrice()
+          .toString()
+          .replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,") + "đ"
+      }</h4>
     `,
   });
 };

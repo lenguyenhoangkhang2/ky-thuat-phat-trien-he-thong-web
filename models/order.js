@@ -52,4 +52,17 @@ const orderSchema = new Schema(
   { timestamps: true }
 );
 
+orderSchema.methods = {
+  getTotalPrice() {
+    return this.products.reduce((total, p) => {
+      return (
+        (total +=
+          Math.round(
+            (p.product.price * (1 - p.product.discount / 100)) / 10000
+          ) * 10000) * p.quantity
+      );
+    }, 0);
+  },
+};
+
 module.exports = mongoose.model("Order", orderSchema);
