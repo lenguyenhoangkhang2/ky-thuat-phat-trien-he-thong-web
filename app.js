@@ -8,6 +8,7 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const passport = require("passport");
 const csrf = require("csurf");
 const flash = require("connect-flash");
+const http = require("http");
 const https = require("https");
 const fs = require("fs");
 
@@ -145,3 +146,12 @@ mongoose
   .catch((err) => {
     console.log(err);
   });
+
+http
+  .createServer(function (req, res) {
+    res.writeHead(301, {
+      Location: "https://" + req.headers["host"] + req.url,
+    });
+    res.end();
+  })
+  .listen(80);
