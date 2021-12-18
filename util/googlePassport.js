@@ -21,7 +21,7 @@ module.exports = (passport) => {
       {
         clientID: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        callbackURL: "/oauth2/google/callback",
+        callbackURL: "https://localhost:3000/oauth2/google/callback",
       },
       async (accessToken, refreshToken, profile, done) => {
         try {
@@ -29,7 +29,9 @@ module.exports = (passport) => {
           if (userByGoogleId) {
             return done(null, userByGoogleId);
           } else {
-            let userByEmail = await User.findOne({ email: profile.emails[0].value });
+            let userByEmail = await User.findOne({
+              email: profile.emails[0].value,
+            });
 
             if (userByEmail) {
               if (!userByEmail.googleId) {

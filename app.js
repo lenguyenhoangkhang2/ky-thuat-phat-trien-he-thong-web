@@ -8,6 +8,8 @@ const MongoDBStore = require("connect-mongodb-session")(session);
 const passport = require("passport");
 const csrf = require("csurf");
 const flash = require("connect-flash");
+const https = require("https");
+const fs = require("fs");
 
 const User = require("./models/user");
 const { isAdmin } = require("./middleware/auth");
@@ -99,35 +101,46 @@ const errorController = require("./controllers/error");
 
 app.use(errorController.get404);
 
-// app.use((error, req, res, next) => {
-//   res.locals.isAuthenticated = req.session.isLoggedIn;
-//   res.locals.csrfToken = req.csrfToken();
-//   if (req.user) {
-//     res.locals.isAdmin = req.user.roles.includes("admin");
-//     res.locals.username = req.user.name;
-//   }
+app.use((error, req, res, next) => {
+  console.log("Da chay vao day");
+  res.locals.isAuthenticated = req.session.isLoggedIn;
+  res.locals.csrfToken = req.csrfToken();
+  if (req.user) {
+    res.locals.isAdmin = req.user.roles.includes("admin");
+    res.locals.username = req.user.name;
+  }
 
-//   if (error.httpStatusCode) {
-//     res.status(error.httpStatusCode).render("error", {
-//       pageTitle: `Error ${error.httpStatusCode}`,
-//       path: "/error",
-//       errorMessage: error.message || "Xảy ra lỗi chưa biết",
-//       httpStatusCode: error.httpStatusCode || false,
-//     });
-//   } else {
-//     res.status(500).render("500", {
-//       pageTitle: "Error",
-//       path: "/500",
-//     });
-//   }
-// });
+  if (error.httpStatusCode) {
+    res.status(error.httpStatusCode).render("error", {
+      pageTitle: `Error ${error.httpStatusCode}`,
+      path: "/error",
+      errorMessage: error.message || "Xảy ra lỗi chưa biết",
+      httpStatusCode: error.httpStatusCode || false,
+    });
+  } else {
+    res.status(500).render("500", {
+      pageTitle: "Error",
+      path: "/500",
+    });
+  }
+});
 
 mongoose
   .connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
     console.log("Database is connected");
-    console.log(`Open website http://localhost:${PORT}`);
-    app.listen(PORT);
+
+    https
+      .createServer(
+        {
+          key: fs.readFileSync("server.key"),
+          cert: fs.readFileSync("server.cert"),
+        },
+        app
+      )
+      .listen(PORT, () => {
+        console.log(`HTTPS Server running on https://localhost:${PORT}`);
+      });
   })
   .catch((err) => {
     console.log(err);
