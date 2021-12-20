@@ -1,6 +1,5 @@
 const fs = require("fs");
 const path = require("path");
-const pdfDocument = require("pdfkit");
 const queryString = require("query-string");
 const stripe = require("stripe")(
   "sk_test_51IjzZzI46iToXABs6pgoDEDMuGhGIW1hHMR21Ucg6XINESSCnMg7tIcqaw81g51TMJmndS8Su6rW0hwTHX1stneC00swRs3LDD"
@@ -426,7 +425,10 @@ exports.getOrders = async (req, res, next) => {
 exports.cancelOrderOwner = async (req, res, next) => {
   const orderId = req.params.orderId;
   try {
-    const order = await Order.findOne({ _id: orderId, "user.userId": req.user._id });
+    const order = await Order.findOne({
+      _id: orderId,
+      "user.userId": req.user._id,
+    });
     if (order) {
       if (["Đã hủy", "Đã nhận"].includes(order.status)) {
         const error = {
@@ -463,50 +465,4 @@ exports.cancelOrderOwner = async (req, res, next) => {
     error.httpStatusCode = 500;
     return next(error);
   }
-};
-
-exports.getInvoice = (req, res, next) => {
-  const orderId = req.params.orderId;
-  Order.findById(orderId)
-    .then((order) => {
-      if (!order) {
-        return next(new Error("No order found!"));
-      }
-      if (order.user.userId.toString() !== req.user._id.toString()) {
-        return next(new Error("Unauthorized"));
-      }
-
-      const invoiceName = "invoice-" + orderId + ".pdf";
-      const invoicePath = path.join("data", "invoices", invoiceName);
-
-      const pdfDoc = new pdfDocument({ size: "A5" });
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", "inline; filename='" + invoiceName + "'");
-
-      pdfDoc.pipe(fs.createWriteStream(invoicePath));
-      pdfDoc.pipe(res);
-
-      let totalPrice = 0;
-
-      pdfDoc.font("Times-Roman").fontSize(26).text("INVOICE", {
-        underline: true,
-      });
-
-      order.products.forEach((item) => {
-        totalPrice += item.product.price * item.quantity;
-        pdfDoc
-          .font("Times-Roman")
-          .fontSize(12)
-          .text(
-            item.product.name + " - " + item.quantity + " x " + item.product.price + "đ"
-          );
-      });
-
-      pdfDoc.fontSize(20).text("Total: " + totalPrice);
-
-      pdfDoc.end();
-    })
-    .catch((err) => {
-      return next(err);
-    });
 };

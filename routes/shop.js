@@ -19,7 +19,12 @@ router.get("/cart", isAuth, shopController.getCart);
 
 router.post("/cart", isAuth, shopController.postCart);
 
-router.post("/cart/quantity", isAuth, express.json(), shopController.updateCartQuantity);
+router.post(
+  "/cart/quantity",
+  isAuth,
+  express.json(),
+  shopController.updateCartQuantity
+);
 
 router.post("/cart-delete-item", isAuth, shopController.postCartDeleteProduct);
 
@@ -29,8 +34,10 @@ router.get("/checkout/cod-payment", isAuth, shopController.orderCod);
 
 router.get("/orders", isAuth, shopController.getOrders);
 
-router.get("/orders/:orderId", isAuth, shopController.getInvoice);
-
-router.get("/cancel-order-owner/:orderId", isAuth, shopController.cancelOrderOwner);
+router.get(
+  "/cancel-order-owner/:orderId",
+  isAuth,
+  shopController.cancelOrderOwner
+);
 
 module.exports = router;

@@ -23,12 +23,18 @@ router.post(
     body("category").not().isEmpty().withMessage("Yêu cầu chọn loại sản phẩm"),
     body("name").not().isEmpty().withMessage("Yêu cầu tên sản phẩm"),
     body("price").not().isEmpty().withMessage("Yêu cầu thông tin giá sản phẩm"),
-    body("quantity").not().isEmpty().withMessage("Yêu cầu số lượng sản phẩm hiện có"),
+    body("quantity")
+      .not()
+      .isEmpty()
+      .withMessage("Yêu cầu số lượng sản phẩm hiện có"),
     body("brand").not().isEmpty().withMessage("Yêu cầu tên thương hiệu"),
     body("discount")
       .isFloat({ min: 0, max: 100 })
       .withMessage("Giá trị 0 < giảm giá < 100"),
-    body("details").not().isEmpty().withMessage("Yêu cầu thông số chi tiết sản phẩm"),
+    body("details")
+      .not()
+      .isEmpty()
+      .withMessage("Yêu cầu thông số chi tiết sản phẩm"),
   ],
   adminController.postAddProduct
 );
@@ -42,7 +48,10 @@ router.post(
 
   uploadImage.single("image"),
   [
-    body("linkTo").not().isEmpty().withMessage("Yêu cầu một địa chỉ liên kết cho ảnh"),
+    body("linkTo")
+      .not()
+      .isEmpty()
+      .withMessage("Yêu cầu một địa chỉ liên kết cho ảnh"),
     body("type").not().isEmpty().withMessage("Yêu cầu loại ảnh"),
   ],
   adminController.updateHeaderImage
@@ -61,7 +70,10 @@ router.post(
 
   uploadImage.single("image"),
   [
-    body("linkTo").not().isEmpty().withMessage("Yêu cầu một địa chỉ liên kết cho ảnh"),
+    body("linkTo")
+      .not()
+      .isEmpty()
+      .withMessage("Yêu cầu một địa chỉ liên kết cho ảnh"),
     body("type").not().isEmpty().withMessage("Yêu cầu loại ảnh"),
   ],
   adminController.addHeaderImage
@@ -80,12 +92,18 @@ router.post(
     body("category").not().isEmpty().withMessage("Yêu cầu chọn loại sản phẩm"),
     body("name").not().isEmpty().withMessage("Yêu cầu tên sản phẩm"),
     body("price").not().isEmpty().withMessage("Yêu cầu thông tin giá sản phẩm"),
-    body("quantity").not().isEmpty().withMessage("Yêu cầu số lượng sản phẩm hiện có"),
+    body("quantity")
+      .not()
+      .isEmpty()
+      .withMessage("Yêu cầu số lượng sản phẩm hiện có"),
     body("brand").not().isEmpty().withMessage("Yêu cầu tên thương hiệu"),
     body("discount")
       .isFloat({ min: 0, max: 100 })
       .withMessage("Giá trị 0 < giảm giá < 100"),
-    body("details").not().isEmpty().withMessage("Yêu cầu thông số chi tiết sản phẩm"),
+    body("details")
+      .not()
+      .isEmpty()
+      .withMessage("Yêu cầu thông số chi tiết sản phẩm"),
   ],
   adminController.postEditProduct
 );
@@ -95,6 +113,8 @@ router.get("/update-order/:orderId", adminController.updateOrder);
 router.get("/cancel-order/:orderId", adminController.cancelOrder);
 
 router.get("/return-order/:orderId", adminController.returnOrder);
+
+router.get("/orders/:orderId/invoice", adminController.getInvoice);
 
 router.get("/product/:productId", adminController.deleteProduct);
 

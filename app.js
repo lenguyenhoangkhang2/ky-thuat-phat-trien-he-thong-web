@@ -103,7 +103,8 @@ const errorController = require("./controllers/error");
 app.use(errorController.get404);
 
 app.use((error, req, res, next) => {
-  console.log("Da chay vao day");
+  console.log(error);
+
   res.locals.isAuthenticated = req.session.isLoggedIn;
   res.locals.csrfToken = req.csrfToken();
   if (req.user) {
