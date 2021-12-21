@@ -14,11 +14,15 @@
             <% slider.forEach((image, index) => { %>
                 <% if (index===0) { %>
                 <div class="carousel-item active">
+                <a href="<%= image.linkTo %>">
                     <img src="/<%= image.imageUrl %>" class="d-block w-100" alt="image-slider">
+                    </a>
                 </div>
                 <% } else { %> 
                 <div class="carousel-item">
+                <a href="<%= image.linkTo %>">
                     <img src="/<%= image.imageUrl %>" class="d-block w-100" alt="image-slider">
+                    </a>
                 </div>
                 <% } %> 
             <% }) %> 

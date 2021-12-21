@@ -8,8 +8,9 @@ const stripe = require("stripe")(
 const Product = require("../models/product");
 const Order = require("../models/order");
 const HeaderImage = require("../models/headerImage");
+const { formatOrderList } = require("../util/formatOrder");
 
-const ITEM_PER_PAGE = 2;
+const ITEM_PER_PAGE = 8;
 
 exports.getProducts = async (req, res, next) => {
   let message = req.flash("error");
@@ -385,7 +386,14 @@ exports.getCheckout = async (req, res, next) => {
     await req.user.populate("cart.items.productId").execPopulate();
     const products = req.user.cart.items;
     const total = products.reduce((total, p) => {
-      return total + p.quantity * p.productId.price;
+      return (
+        total +
+        Math.round(
+          (p.productId.price * (1 - p.productId.discount / 100)) / 10000
+        ) *
+          10000 *
+          p.quantity
+      );
     }, 0);
 
     res.render("shop/checkout", {
@@ -406,9 +414,12 @@ exports.getCheckout = async (req, res, next) => {
 
 exports.getOrders = async (req, res, next) => {
   try {
-    const orders = await Order.find({ "user.userId": req.user._id }).populate(
+    let orders = await Order.find({ "user.userId": req.user._id }).populate(
       "user.userId"
     );
+
+    orders = formatOrderList(orders);
+
     res.render("shop/orders", {
       path: "/orders",
       pageTitle: "Your Orders",

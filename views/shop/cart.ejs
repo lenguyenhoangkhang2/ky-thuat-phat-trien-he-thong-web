@@ -89,7 +89,7 @@
                         const errorAlert = document.querySelector("#error-message");
 
                         try {
-                            const response = await axios.post("http://localhost:3000/cart/quantity", {
+                            const response = await axios.post("https://localhost:443/cart/quantity", {
                                     quantity: quantity,
                                     productId: productId,
                                 },

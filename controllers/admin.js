@@ -9,6 +9,7 @@ const Order = require("../models/order");
 const queryString = require("query-string");
 const { path } = require("pdfkit");
 const pdfDocument = require("pdfkit");
+const { formatOrderList } = require("../util/formatOrder");
 
 exports.getAddProduct = (req, res, next) => {
   res.render("admin/edit-product", {
@@ -145,14 +146,14 @@ exports.getEditProduct = (req, res, next) => {
     });
 };
 
-exports.postEditProduct = (req, res, next) => {
+exports.postEditProduct = async (req, res, next) => {
   const prodId = req.body.productId;
   const name = req.body.name;
   const quantity = req.body.quantity;
   const brand = req.body.brand;
   const category = req.body.category;
-  const official = req.files["official"];
-  const slider = req.files["slider"];
+  const official = req.files["official"] || 0;
+  const slider = req.files["slider"] || 0;
   const price = req.body.price;
   const discount = req.body.discount;
   const description = req.body.description;
@@ -163,6 +164,8 @@ exports.postEditProduct = (req, res, next) => {
   validationResult(req)
     .array()
     .forEach((e) => responseErrors.push({ param: e.param, msg: e.msg }));
+
+  console.log(responseErrors);
 
   if (responseErrors.length > 0) {
     return res.status(422).render("admin/edit-product", {
@@ -184,42 +187,41 @@ exports.postEditProduct = (req, res, next) => {
     });
   }
 
-  Product.findById(prodId)
-    .then((product) => {
-      product.name = name;
-      product.brand = brand;
-      product.category = category;
-      product.quantity = quantity;
-      product.price = price;
-      product.description = description;
-      product.discount = discount;
-      product.details = details.split(/\r?\n/).map((i) => ({
-        specKey: i.split(":")[0],
-        specValue: i.split(":")[1],
-      }));
+  try {
+    const product = await Product.findById(prodId);
+    product.name = name;
+    product.brand = brand;
+    product.category = category;
+    product.quantity = quantity;
+    product.price = price;
+    product.description = description;
+    product.discount = discount;
+    product.details = details.split(/\r?\n/).map((i) => ({
+      specKey: i.split(":")[0],
+      specValue: i.split(":")[1],
+    }));
 
-      if (official.length > 0) {
-        File.deleteFile(product.imageUrl.official);
-        product.imageUrl.official = official[0].path;
-      }
+    if (official.length > 0) {
+      File.deleteFile(product.imageUrl.official);
+      product.imageUrl.official = official[0].path;
+    }
 
-      if (slider.length > 0) {
-        product.imageUrl.slider.forEach((oldImage) => {
-          File.deleteFile(oldImage);
-        });
-        product.imageUrl.slider = slider.map((image) => image.path);
-      }
-
-      return product.save().then(() => {
-        console.log("UPDATED PRODUCT!: \n" + product);
-        res.redirect("/admin/products");
+    if (slider.length > 0) {
+      product.imageUrl.slider.forEach((oldImage) => {
+        File.deleteFile(oldImage);
       });
-    })
-    .catch((err) => {
-      const error = new Error(err);
-      error.httpStatusCode = 500;
-      return next(error);
+      product.imageUrl.slider = slider.map((image) => image.path);
+    }
+
+    return product.save().then(() => {
+      console.log("UPDATED PRODUCT!: \n" + product);
+      res.redirect("/products");
     });
+  } catch (err) {
+    const error = new Error(err);
+    error.httpStatusCode = 500;
+    return next(error);
+  }
 };
 
 exports.getProducts = (req, res, next) => {
@@ -617,6 +619,8 @@ exports.getOrders = async (req, res, next) => {
       (page - 1) * ITEM_PER_PAGE,
       (page - 1) * ITEM_PER_PAGE + ITEM_PER_PAGE
     );
+
+    orders = formatOrderList(orders);
 
     res.render("admin/orders", {
       path: "/admin/orders",
